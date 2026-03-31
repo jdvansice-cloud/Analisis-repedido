@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Pedidos de Reposici&oacute;n</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #16a34a;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+        .header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: white; padding: 1.5rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .header h1 { font-size: 1.5rem; font-weight: 600; }
+        .header p { font-size: 0.85rem; opacity: 0.85; }
+        .container { max-width: 1900px; margin: 0 auto; padding: 1.5rem; }
+        .panel { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .panel-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+
+        .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: #eff6ff; }
+        .upload-zone svg { width: 48px; height: 48px; color: var(--primary); margin-bottom: 0.5rem; }
+        .upload-zone p { color: var(--text-light); font-size: 0.9rem; }
+        .upload-zone .filename { color: var(--primary); font-weight: 600; margin-top: 0.5rem; }
+
+        .params-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .param-group label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-light); margin-bottom: 0.3rem; }
+        .param-group input, .param-group select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: white; transition: border-color 0.2s; }
+        .param-group input:focus, .param-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .param-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+
+        .btn { padding: 0.6rem 1.5rem; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        .actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+        .stat-card .value { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+        .stat-card .label { font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem; }
+        .stat-card.danger .value { color: var(--danger); }
+        .stat-card.warning .value { color: var(--warning); }
+        .stat-card.success .value { color: var(--success); }
+
+        .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .class-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+        .class-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text); }
+        .class-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.82rem; border-bottom: 1px solid #f1f5f9; }
+        .class-row:last-child { border-bottom: none; }
+        .class-label { color: var(--text-light); }
+        .class-value { font-weight: 600; }
+
+        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); max-height: 75vh; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; }
+        thead th { background: #f1f5f9; padding: 0.5rem 0.55rem; text-align: left; font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--border); position: sticky; top: 0; cursor: pointer; user-select: none; z-index: 2; }
+        thead th:hover { background: #e2e8f0; }
+        thead th.sorted-asc::after { content: " \u25B2"; font-size: 0.6rem; }
+        thead th.sorted-desc::after { content: " \u25BC"; font-size: 0.6rem; }
+        thead th.month-col { background: #eef2ff; color: #4338ca; font-size: 0.7rem; min-width: 38px; text-align: right; }
+        tbody td { padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); }
+        tbody tr:hover { background: #f8fafc; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .badge { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; }
+        .badge-critico { background: #fef2f2; color: #dc2626; }
+        .badge-bajo { background: #fffbeb; color: #d97706; }
+        .badge-reponer { background: #eff6ff; color: #2563eb; }
+        .badge-ok { background: #f0fdf4; color: #16a34a; }
+        .badge-sinventas { background: #f8fafc; color: #94a3b8; }
+        .badge-abc-a { background: #fef2f2; color: #dc2626; }
+        .badge-abc-b { background: #fffbeb; color: #d97706; }
+        .badge-abc-c { background: #f0fdf4; color: #16a34a; }
+        .badge-demand { background: #f1f5f9; color: var(--text-light); font-size: 0.66rem; }
+        .badge-demand.suave { background: #f0fdf4; color: #16a34a; }
+        .badge-demand.erratica { background: #fffbeb; color: #d97706; }
+        .badge-demand.intermitente { background: #eff6ff; color: #2563eb; }
+        .badge-demand.irregular { background: #fef2f2; color: #dc2626; }
+
+        .highlight-row { background: #fef2f2 !important; }
+
+        .month-val { font-size: 0.75rem; color: var(--text); text-align: right; }
+        .month-val.zero { color: #cbd5e1; }
+        .month-val.high { color: var(--primary); font-weight: 600; }
+        .month-val.excl { color: #d1d5db; text-decoration: line-through; }
+        .month-excluded { background: #fef9f0 !important; }
+        thead th.month-excluded { background: #fef3c7 !important; color: #92400e !important; }
+
+        /* Editable order qty */
+        .order-input {
+            width: 58px;
+            padding: 0.2rem 0.35rem;
+            border: 1.5px solid var(--border);
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: right;
+            background: white;
+            transition: all 0.2s;
+        }
+        .order-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+        .order-input.edited { border-color: #f59e0b; background: #fffbeb; }
+        .order-input.zero { color: #94a3b8; }
+
+        .edit-indicator { font-size: 0.65rem; color: #f59e0b; font-weight: 600; margin-left: 2px; }
+        .order-value-cell { font-weight: 600; }
+        .order-value-cell.edited { color: #d97706; }
+
+        .loading { display: none; text-align: center; padding: 2rem; color: var(--text-light); }
+        .loading.active { display: block; }
+        .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #results { display: none; }
+
+        .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select { padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.83rem; }
+        .filter-bar input[type="text"] { width: 220px; }
+        .export-info { font-size: 0.8rem; color: var(--text-light); margin-left: auto; }
+
+        .edit-banner { display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #92400e; align-items: center; gap: 0.75rem; }
+        .edit-banner.active { display: flex; }
+        .edit-banner .edit-count { font-weight: 700; }
+
+        .month-exclusion { margin-top: 1.25rem; }
+        .month-excl-title { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-light); margin-bottom: 0.5rem; }
+        .month-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .month-chip {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.78rem; font-weight: 500;
+            cursor: pointer; user-select: none; transition: all 0.15s;
+            border: 1.5px solid var(--primary); background: #eff6ff; color: var(--primary);
+        }
+        .month-chip:hover { background: #dbeafe; }
+        .month-chip.excluded { border-color: #e2e8f0; background: #f8fafc; color: #94a3b8; text-decoration: line-through; }
+        .month-chip .chip-check { font-size: 0.7rem; }
+
+        .method-info { font-size: 0.72rem; color: var(--muted); margin-top: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); line-height: 1.7; }
+        .method-info strong { color: var(--text); }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .params-grid { grid-template-columns: repeat(2, 1fr); }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .filter-bar input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Calculadora de Pedidos de Reposici&oacute;n</h1>
+            <p>Suba archivo de inventario &bull; Configure par&aacute;metros &bull; Obtenga cantidades sugeridas con an&aacute;lisis avanzado de demanda</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <div class="panel-title">Subir Archivo de Inventario</div>
+            <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6h.1a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <p>Arrastre y suelte su archivo Excel aqu&iacute; o <strong>haga clic para buscar</strong></p>
+                <p style="font-size:0.75rem; margin-top:0.3rem;">Soporta archivos .xlsx y .xls</p>
+                <div class="filename" id="fileName"></div>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Par&aacute;metros de Pedido</div>
+            <div class="params-grid">
+                <div class="param-group">
+                    <label for="leadTime">Tiempo de Entrega (meses)</label>
+                    <input type="number" id="leadTime" value="3" min="0.5" max="24" step="0.5">
+                    <div class="param-hint">Tiempo desde pedido hasta recepci&oacute;n</div>
+                </div>
+                <div class="param-group">
+                    <label for="targetStock">Stock Objetivo (meses)</label>
+                    <input type="number" id="targetStock" value="3" min="1" max="24" step="0.5">
+                    <div class="param-hint">Cobertura deseada despu&eacute;s de recibir</div>
+                </div>
+                <div class="param-group">
+                    <label for="serviceLevel">Nivel de Servicio (%)</label>
+                    <select id="serviceLevel">
+                        <option value="85">85%</option>
+                        <option value="90">90%</option>
+                        <option value="92">92%</option>
+                        <option value="95" selected>95%</option>
+                        <option value="97">97%</option>
+                        <option value="98">98%</option>
+                        <option value="99">99%</option>
+                    </select>
+                    <div class="param-hint">Probabilidad de no tener quiebre de stock</div>
+                </div>
+                <div class="param-group">
+                    <label for="salesMonths">Historial de Ventas (meses)</label>
+                    <select id="salesMonths">
+                        <option value="1">&Uacute;ltimo 1 mes</option>
+                        <option value="2">&Uacute;ltimos 2 meses</option>
+                        <option value="3" selected>&Uacute;ltimos 3 meses</option>
+                        <option value="6">&Uacute;ltimos 6 meses</option>
+                        <option value="12">&Uacute;ltimos 12 meses</option>
+                    </select>
+                    <div class="param-hint">Per&iacute;odo para promedio m&oacute;vil</div>
+                </div>
+                <div class="param-group">
+                    <label for="minOrder">Cantidad M&iacute;nima de Pedido</label>
+                    <input type="number" id="minOrder" value="1" min="1" max="1000">
+                    <div class="param-hint">Unidades m&iacute;nimas por SKU</div>
+                </div>
+                <div class="param-group">
+                    <label for="rounding">Redondear a M&uacute;ltiplo</label>
+                    <input type="number" id="rounding" value="1" min="1" max="100">
+                    <div class="param-hint">Redondear hacia arriba al m&uacute;ltiplo de X</div>
+                </div>
+            </div>
+
+            <div class="month-exclusion">
+                <label class="month-excl-title">Excluir Meses del An&aacute;lisis <span class="param-hint" style="display:inline">(desmarque los meses que no desea incluir, ej: Nov/Dic para art&iacute;culos no estacionales)</span></label>
+                <div class="month-chips" id="monthChips"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="calcBtn" disabled onclick="calculate()">Calcular Pedidos</button>
+                <button class="btn btn-secondary" id="exportBtn" style="display:none" onclick="exportCSV()">Exportar CSV</button>
+                <button class="btn btn-warning" id="resetBtn" style="display:none" onclick="resetEdits()">Restaurar Cantidades Sugeridas</button>
+            </div>
+            <div class="method-info">
+                <strong>M&eacute;todos:</strong>
+                <strong>Suave/Err&aacute;tica</strong> &rarr; Promedio m&oacute;vil &nbsp;|&nbsp;
+                <strong>Intermitente/Irregular</strong> &rarr; Croston SBA &nbsp;|&nbsp;
+                <strong>Stock Seg.</strong> = Z &times; &sigma; &times; &radic;LT &nbsp;|&nbsp;
+                <strong>Clasif.</strong>: ABC (valor) + XYZ (variabilidad) + Patr&oacute;n ADI/CV&sup2; &nbsp;|&nbsp;
+                <strong>Edite</strong> la columna "Cant. Pedido" para ajustar manualmente
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analizando datos de inventario...</p>
+        </div>
+
+        <div id="results">
+            <div class="summary-grid" id="summaryGrid"></div>
+            <div class="class-grid" id="classGrid"></div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    Recomendaciones de Pedido
+                    <span class="export-info" id="itemCount"></span>
+                </div>
+
+                <div class="edit-banner" id="editBanner">
+                    <span>Se han editado <span class="edit-count" id="editCount">0</span> cantidades manualmente.</span>
+                    <span>Los totales se actualizan autom&aacute;ticamente.</span>
+                </div>
+
+                <div class="filter-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar material, descripci&oacute;n, marca..." oninput="filterTable()">
+                    <select id="statusFilter" onchange="filterTable()">
+                        <option value="">Todos los Estados</option>
+                        <option value="Cr\u00edtico">Cr&iacute;tico</option>
+                        <option value="Bajo">Bajo</option>
+                        <option value="Reponer">Reponer</option>
+                        <option value="OK">OK</option>
+                        <option value="Sin Ventas">Sin Ventas</option>
+                    </select>
+                    <select id="demandFilter" onchange="filterTable()">
+                        <option value="">Todos los Patrones</option>
+                        <option value="Suave">Suave</option>
+                        <option value="Err\u00e1tica">Err&aacute;tica</option>
+                        <option value="Intermitente">Intermitente</option>
+                        <option value="Irregular">Irregular</option>
+                        <option value="Sin Demanda">Sin Demanda</option>
+                    </select>
+                    <select id="abcFilter" onchange="filterTable()">
+                        <option value="">Todas las Clases</option>
+                        <option value="A">ABC: A</option>
+                        <option value="B">ABC: B</option>
+                        <option value="C">ABC: C</option>
+                    </select>
+                    <select id="orderFilter" onchange="filterTable()">
+                        <option value="">Todos</option>
+                        <option value="needs_order">Necesita Pedido</option>
+                        <option value="no_order">No Necesita</option>
+                        <option value="edited">Editados</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = null;
+        let currentFile = null;
+        let sortCol = null;
+        let sortDir = "asc";
+        let userEdits = {};
+
+        // Excluded months: set of 0-based indices (0=Vta01=most recent, 11=Vta12=oldest)
+        let excludedMonths = new Set();
+
+        // Map Vta index to actual calendar month name
+        // Vta 01 = last complete month. Current date determines the mapping.
+        const MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+
+        function buildMonthChips() {
+            const now = new Date();
+            // Vta 01 = previous complete month
+            let refMonth = now.getMonth() - 1; // 0-indexed (0=Jan)
+            let refYear = now.getFullYear();
+            if (refMonth < 0) { refMonth = 11; refYear--; }
+
+            const container = document.getElementById("monthChips");
+            container.innerHTML = "";
+
+            for (let i = 0; i < 12; i++) {
+                let m = refMonth - i;
+                let y = refYear;
+                while (m < 0) { m += 12; y--; }
+
+                const label = `${MONTH_NAMES_ES[m]} ${String(y).slice(2)}`;
+                const chip = document.createElement("span");
+                chip.className = "month-chip" + (excludedMonths.has(i) ? " excluded" : "");
+                chip.dataset.index = i;
+                chip.innerHTML = `<span class="chip-check">${excludedMonths.has(i) ? "\u2717" : "\u2713"}</span> ${label}`;
+                chip.title = `Vta ${String(i+1).padStart(2,"0")} \u2014 clic para ${excludedMonths.has(i) ? "incluir" : "excluir"}`;
+                chip.onclick = () => toggleMonth(i);
+                container.appendChild(chip);
+            }
+        }
+
+        function toggleMonth(idx) {
+            if (excludedMonths.has(idx)) excludedMonths.delete(idx);
+            else excludedMonths.add(idx);
+            buildMonthChips();
+        }
+
+        // Initialize chips on load
+        buildMonthChips();
+
+        const dropZone = document.getElementById("dropZone");
+        const fileInput = document.getElementById("fileInput");
+
+        dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener("change", e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+        function handleFile(file) {
+            if (!file.name.match(/\.xlsx?$/i)) { alert("Por favor seleccione un archivo Excel (.xlsx o .xls)"); return; }
+            currentFile = file;
+            document.getElementById("fileName").textContent = file.name;
+            document.getElementById("calcBtn").disabled = false;
+        }
+
+        function calculate() {
+            if (!currentFile) return;
+            const fd = new FormData();
+            fd.append("file", currentFile);
+            fd.append("lead_time_months", document.getElementById("leadTime").value);
+            fd.append("target_stock_months", document.getElementById("targetStock").value);
+            fd.append("service_level", document.getElementById("serviceLevel").value);
+            fd.append("min_order_qty", document.getElementById("minOrder").value);
+            fd.append("rounding", document.getElementById("rounding").value);
+            fd.append("sales_months_to_use", document.getElementById("salesMonths").value);
+            fd.append("excluded_months", [...excludedMonths].join(","));
+
+            document.getElementById("loading").classList.add("active");
+            document.getElementById("results").style.display = "none";
+
+            fetch("/api/upload", { method: "POST", body: fd })
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById("loading").classList.remove("active");
+                    if (data.error) { alert("Error: " + data.error); return; }
+                    currentData = data;
+                    userEdits = {};
+                    updateEditBanner();
+                    renderResults(data);
+                })
+                .catch(err => {
+                    document.getElementById("loading").classList.remove("active");
+                    alert("Error: " + err.message);
+                });
+        }
+
+        function getEffectiveQty(r) {
+            if (userEdits[r.material] !== undefined) return userEdits[r.material];
+            return r.suggested_qty;
+        }
+
+        function getEffectiveValue(r) {
+            return getEffectiveQty(r) * r.fob;
+        }
+
+        function updateSummaryTotals() {
+            if (!currentData) return;
+            const results = currentData.results;
+            const totalUnits = results.reduce((s, r) => s + getEffectiveQty(r), 0);
+            const totalValue = results.reduce((s, r) => s + getEffectiveValue(r), 0);
+            const itemsToOrder = results.filter(r => getEffectiveQty(r) > 0).length;
+
+            const el = document.getElementById("summaryGrid");
+            if (!el) return;
+            const cards = el.querySelectorAll(".stat-card");
+            if (cards.length >= 7) {
+                cards[1].querySelector(".value").textContent = itemsToOrder;
+                cards[2].querySelector(".value").textContent = totalUnits.toLocaleString();
+                cards[5].querySelector(".value").textContent = "$" + totalValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            }
+        }
+
+        function updateEditBanner() {
+            const editCount = Object.keys(userEdits).length;
+            const banner = document.getElementById("editBanner");
+            const resetBtn = document.getElementById("resetBtn");
+            if (editCount > 0) {
+                banner.classList.add("active");
+                resetBtn.style.display = "inline-flex";
+                document.getElementById("editCount").textContent = editCount;
+            } else {
+                banner.classList.remove("active");
+                resetBtn.style.display = "none";
+            }
+        }
+
+        function onOrderQtyChange(material, inputEl) {
+            const newVal = Math.max(0, parseInt(inputEl.value) || 0);
+            inputEl.value = newVal;
+            const original = currentData.results.find(r => r.material === material);
+            if (!original) return;
+
+            if (newVal !== original.suggested_qty) {
+                userEdits[material] = newVal;
+                inputEl.classList.add("edited");
+            } else {
+                delete userEdits[material];
+                inputEl.classList.remove("edited");
+            }
+            inputEl.classList.toggle("zero", newVal === 0);
+
+            // Update order value in same row
+            const valueCell = document.getElementById("val_" + material);
+            if (valueCell) {
+                const newValue = newVal * original.fob;
+                valueCell.textContent = "$" + newValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                valueCell.classList.toggle("edited", userEdits[material] !== undefined);
+            }
+
+            updateEditBanner();
+            updateSummaryTotals();
+        }
+
+        function resetEdits() {
+            userEdits = {};
+            updateEditBanner();
+            filterTable();
+            updateSummaryTotals();
+        }
+
+        function renderResults(data) {
+            document.getElementById("results").style.display = "block";
+            document.getElementById("exportBtn").style.display = "inline-flex";
+
+            const s = data.summary;
+            document.getElementById("summaryGrid").innerHTML = `
+                <div class="stat-card"><div class="value">${s.total_items}</div><div class="label">Total SKUs</div></div>
+                <div class="stat-card" style="border-left:3px solid var(--primary)"><div class="value">${s.items_to_order}</div><div class="label">Art\u00edculos a Pedir</div></div>
+                <div class="stat-card"><div class="value">${s.total_units.toLocaleString()}</div><div class="label">Unidades Totales</div></div>
+                <div class="stat-card danger"><div class="value">${s.critical_items}</div><div class="label">Stock Cr\u00edtico</div></div>
+                <div class="stat-card warning"><div class="value">${s.low_items}</div><div class="label">Stock Bajo</div></div>
+                <div class="stat-card success"><div class="value">$${s.total_order_value_fob.toLocaleString()}</div><div class="label">Valor Total (FOB)</div></div>
+                <div class="stat-card"><div class="value">${s.no_sales_items}</div><div class="label">Sin Ventas</div></div>
+            `;
+
+            const dp = s.demand_pattern_counts;
+            const abc = s.abc_xyz_counts;
+            const abcKeys = Object.keys(abc).sort();
+            document.getElementById("classGrid").innerHTML = `
+                <div class="class-card">
+                    <h3>Patr\u00f3n de Demanda (Syntetos-Boylan)</h3>
+                    ${Object.entries(dp).map(([k,v]) => `<div class="class-row"><span class="class-label">${k}</span><span class="class-value">${v} SKUs</span></div>`).join("")}
+                </div>
+                <div class="class-card">
+                    <h3>Clasificaci\u00f3n ABC-XYZ</h3>
+                    ${abcKeys.map(k => `<div class="class-row"><span class="class-label">${k}</span><span class="class-value">${abc[k]} SKUs</span></div>`).join("")}
+                </div>
+                <div class="class-card">
+                    <h3>Leyenda</h3>
+                    <div class="class-row"><span class="class-label"><strong>ABC</strong>: A=80% valor, B=95%, C=resto</span></div>
+                    <div class="class-row"><span class="class-label"><strong>XYZ</strong>: X=estable, Y=variable, Z=impredecible</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Suave</strong>: frecuente y estable &nbsp; <strong>Err\u00e1tica</strong>: frecuente, variable</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Intermitente</strong>: espor\u00e1dica, consistente &nbsp; <strong>Irregular</strong>: espor\u00e1dica, variable</span></div>
+                </div>
+            `;
+
+            renderTable(data.results);
+        }
+
+        const baseCols = [
+            { key: "status", label: "Estado", align: "center" },
+            { key: "abc_xyz", label: "ABC-XYZ", align: "center" },
+            { key: "demand_pattern", label: "Patr\u00f3n", align: "center" },
+            { key: "material", label: "Material" },
+            { key: "marca", label: "Marca" },
+            { key: "descripcion", label: "Descripci\u00f3n" },
+            { key: "fecha_compra", label: "\u00dalt. Compra", align: "center" },
+            { key: "cant_compra", label: "Cant. Comp.", align: "right" },
+            { key: "stock_cedi", label: "CEDI", align: "right" },
+            { key: "stock_tiendas", label: "Tiendas", align: "right" },
+            { key: "stock_total", label: "Stock", align: "right" },
+        ];
+
+        const afterMonthCols = [
+            { key: "avg_monthly_sales", label: "Pron\u00f3stico", align: "right" },
+            { key: "forecast_method", label: "M\u00e9todo", align: "center" },
+            { key: "months_of_stock", label: "Meses Stock", align: "right" },
+            { key: "safety_stock_units", label: "Stock Seg.", align: "right" },
+            { key: "rop", label: "ROP", align: "right" },
+            { key: "suggested_qty", label: "Cant. Pedido", align: "right" },
+            { key: "fob", label: "FOB $", align: "right" },
+            { key: "order_value_fob", label: "Valor $", align: "right" },
+        ];
+
+        function getMonthLabel(vtaIndex) {
+            // vtaIndex: 0=Vta01(most recent), 11=Vta12(oldest)
+            const now = new Date();
+            let m = now.getMonth() - 1 - vtaIndex; // Vta01 = prev complete month
+            let y = now.getFullYear();
+            while (m < 0) { m += 12; y--; }
+            return MONTH_NAMES_ES[m % 12] + " " + String(y).slice(2);
+        }
+
+        function renderTable(items) {
+            const thead = document.getElementById("tableHead");
+
+            let headerHtml = "<tr>";
+            baseCols.forEach(c => {
+                let cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
+                let sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
+                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
+            });
+            // Month headers (oldest first: i=11 down to i=0)
+            for (let i = 11; i >= 0; i--) {
+                const isExcl = excludedMonths.has(i);
+                headerHtml += `<th class="month-col text-right${isExcl ? ' month-excluded' : ''}">${getMonthLabel(i)}</th>`;
+            }
+            afterMonthCols.forEach(c => {
+                let cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
+                let sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
+                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
+            });
+            headerHtml += "</tr>";
+            thead.innerHTML = headerHtml;
+
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = items.map(r => {
+                const rowCls = r.status === "Cr\u00edtico" ? " class='highlight-row'" : "";
+                let html = `<tr${rowCls}>`;
+
+                // Base columns
+                baseCols.forEach(c => {
+                    let cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
+                    html += `<td${cls}>${renderCell(c.key, r)}</td>`;
+                });
+
+                // Monthly sales (12 months, oldest to newest)
+                const allSales = r.monthly_sales_all || r.monthly_sales || [];
+                for (let i = 11; i >= 0; i--) {
+                    const v = allSales[i] !== undefined ? allSales[i] : 0;
+                    const intV = Math.round(v);
+                    const isExcl = excludedMonths.has(i);
+                    let cls = "month-val";
+                    if (isExcl) cls += " excl";
+                    else if (intV === 0) cls += " zero";
+                    else if (intV >= 3) cls += " high";
+                    html += `<td class="text-right${isExcl ? ' month-excluded' : ''}"><span class="${cls}">${intV}</span></td>`;
+                }
+
+                // After-month columns
+                afterMonthCols.forEach(c => {
+                    let cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
+                    html += `<td${cls}>${renderCell(c.key, r)}</td>`;
+                });
+
+                html += "</tr>";
+                return html;
+            }).join("");
+
+            document.getElementById("itemCount").textContent = `Mostrando ${items.length} art\u00edculos`;
+        }
+
+        function renderCell(key, r) {
+            if (key === "status") {
+                const m = { "Cr\u00edtico": "badge-critico", "Bajo": "badge-bajo", "Reponer": "badge-reponer", "OK": "badge-ok", "Sin Ventas": "badge-sinventas" };
+                return `<span class="badge ${m[r.status] || ''}">${r.status}</span>`;
+            }
+            if (key === "abc_xyz") {
+                const abcCls = { A: "badge-abc-a", B: "badge-abc-b", C: "badge-abc-c" }[r.abc] || "";
+                return `<span class="badge ${abcCls}">${r.abc_xyz}</span>`;
+            }
+            if (key === "demand_pattern") {
+                const dpCls = { "Suave": "suave", "Err\u00e1tica": "erratica", "Intermitente": "intermitente", "Irregular": "irregular" }[r.demand_pattern] || "";
+                return `<span class="badge badge-demand ${dpCls}">${r.demand_pattern}</span>`;
+            }
+            if (key === "fob") return "$" + r.fob.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            if (key === "order_value_fob") {
+                const effectiveVal = getEffectiveValue(r);
+                const isEdited = userEdits[r.material] !== undefined;
+                return `<span id="val_${r.material}" class="order-value-cell${isEdited ? ' edited' : ''}">$${effectiveVal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
+            }
+            if (key === "avg_monthly_sales") return r[key].toFixed(1);
+            if (key === "suggested_qty") {
+                const effectiveQty = getEffectiveQty(r);
+                const isEdited = userEdits[r.material] !== undefined;
+                return `<input type="number" class="order-input${isEdited ? ' edited' : ''}${effectiveQty === 0 ? ' zero' : ''}" value="${effectiveQty}" min="0" onchange="onOrderQtyChange('${r.material}', this)" onkeyup="if(event.key==='Enter')this.blur()">` +
+                       (isEdited ? `<span class="edit-indicator">*</span>` : '');
+            }
+            if (key === "forecast_method") return `<span style="font-size:0.7rem;color:var(--muted)">${r[key]}</span>`;
+            return r[key];
+        }
+
+        function sortTable(key) {
+            if (sortCol === key) sortDir = sortDir === "asc" ? "desc" : "asc";
+            else { sortCol = key; sortDir = (key === "suggested_qty" || key === "status" || key === "order_value_fob") ? "desc" : "asc"; }
+            filterTable();
+        }
+
+        function filterTable() {
+            if (!currentData) return;
+            let items = [...currentData.results];
+
+            const search = document.getElementById("searchInput").value.toLowerCase();
+            const statusF = document.getElementById("statusFilter").value;
+            const demandF = document.getElementById("demandFilter").value;
+            const abcF = document.getElementById("abcFilter").value;
+            const orderF = document.getElementById("orderFilter").value;
+
+            if (search) items = items.filter(r =>
+                r.material.toLowerCase().includes(search) ||
+                r.descripcion.toLowerCase().includes(search) ||
+                r.marca.toLowerCase().includes(search) ||
+                r.cod_proveedor.toLowerCase().includes(search));
+            if (statusF) items = items.filter(r => r.status === statusF);
+            if (demandF) items = items.filter(r => r.demand_pattern === demandF);
+            if (abcF) items = items.filter(r => r.abc === abcF);
+            if (orderF === "needs_order") items = items.filter(r => getEffectiveQty(r) > 0);
+            if (orderF === "no_order") items = items.filter(r => getEffectiveQty(r) === 0);
+            if (orderF === "edited") items = items.filter(r => userEdits[r.material] !== undefined);
+
+            if (sortCol) {
+                const so = { "Cr\u00edtico": 4, "Bajo": 3, "Reponer": 2, "OK": 1, "Sin Ventas": 0 };
+                items.sort((a, b) => {
+                    let va = a[sortCol], vb = b[sortCol];
+                    if (sortCol === "status") { va = so[va] || 0; vb = so[vb] || 0; }
+                    if (sortCol === "suggested_qty") { va = getEffectiveQty(a); vb = getEffectiveQty(b); }
+                    if (sortCol === "order_value_fob") { va = getEffectiveValue(a); vb = getEffectiveValue(b); }
+                    if (typeof va === "string" && typeof vb === "string") return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+                    if (va === "\u221e") va = 99999;
+                    if (vb === "\u221e") vb = 99999;
+                    return sortDir === "asc" ? (va - vb) : (vb - va);
+                });
+            }
+            renderTable(items);
+        }
+
+        function exportCSV() {
+            if (!currentData) return;
+            // Build export columns
+            const headers = [];
+            baseCols.forEach(c => headers.push(c.label));
+            for (let i = 11; i >= 0; i--) headers.push("Vta M" + String(i+1).padStart(2,'0'));
+            afterMonthCols.forEach(c => {
+                if (c.key === "suggested_qty") {
+                    headers.push("Cant. Sugerida");
+                    headers.push("Cant. Pedido Final");
+                    headers.push("Editado");
+                } else {
+                    headers.push(c.label);
+                }
+            });
+
+            const rows = currentData.results.map(r => {
+                const row = [];
+                baseCols.forEach(c => {
+                    let v = r[c.key];
+                    if (typeof v === "string" && v.includes(",")) v = `"${v}"`;
+                    row.push(v);
+                });
+                const allSales = r.monthly_sales_all || r.monthly_sales || [];
+                for (let i = 11; i >= 0; i--) row.push(Math.round(allSales[i] || 0));
+                afterMonthCols.forEach(c => {
+                    if (c.key === "suggested_qty") {
+                        row.push(r.suggested_qty);
+                        row.push(getEffectiveQty(r));
+                        row.push(userEdits[r.material] !== undefined ? "Si" : "No");
+                    } else if (c.key === "order_value_fob") {
+                        row.push(getEffectiveValue(r).toFixed(2));
+                    } else {
+                        let v = r[c.key];
+                        if (typeof v === "string" && v.includes(",")) v = `"${v}"`;
+                        row.push(v);
+                    }
+                });
+                return row;
+            });
+
+            let csv = "\uFEFF" + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "recomendaciones_pedido.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
