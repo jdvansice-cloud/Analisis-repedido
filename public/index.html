@@ -8,6 +8,7 @@
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
             --danger: #dc2626;
             --warning: #f59e0b;
             --success: #16a34a;
@@ -17,41 +18,75 @@
             --border: #e2e8f0;
             --text: #1e293b;
             --text-light: #64748b;
+            --hover-bg: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+            --radius: 10px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+        [data-theme="dark"] {
+            --primary: #60a5fa;
+            --primary-dark: #3b82f6;
+            --primary-light: #93bbfd;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --success: #4ade80;
+            --muted: #9ca3af;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --hover-bg: #334155;
+        }
 
-        .header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: white; padding: 1.5rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .header h1 { font-size: 1.5rem; font-weight: 600; }
-        .header p { font-size: 0.85rem; opacity: 0.85; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; transition: background 0.3s, color 0.3s; }
+
+        .header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: white; padding: 1rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: space-between; }
+        [data-theme="dark"] .header { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); }
+        .header-left h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+        .header-left p { font-size: 0.8rem; opacity: 0.8; }
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+        .theme-toggle { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.4rem 0.7rem; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+        .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+        .theme-toggle span { font-size: 0.78rem; font-weight: 500; }
+
         .container { max-width: 1900px; margin: 0 auto; padding: 1.5rem; }
-        .panel { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); transition: background 0.3s, border-color 0.3s; }
         .panel-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
 
-        .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc; }
-        .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: #eff6ff; }
+        .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: rgba(37,99,235,0.05); }
         .upload-zone svg { width: 48px; height: 48px; color: var(--primary); margin-bottom: 0.5rem; }
         .upload-zone p { color: var(--text-light); font-size: 0.9rem; }
         .upload-zone .filename { color: var(--primary); font-weight: 600; margin-top: 0.5rem; }
+        .upload-zone .filesize { color: var(--muted); font-size: 0.78rem; }
 
         .params-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
         .param-group label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-light); margin-bottom: 0.3rem; }
-        .param-group input, .param-group select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: white; transition: border-color 0.2s; }
+        .param-group input, .param-group select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: var(--card); color: var(--text); transition: border-color 0.2s; }
         .param-group input:focus, .param-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         .param-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
 
         .btn { padding: 0.6rem 1.5rem; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
-        .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: var(--hover-bg); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
         .btn-warning { background: #f59e0b; color: white; }
         .btn-warning:hover { background: #d97706; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
         .actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
 
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .stat-card .stat-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
         .stat-card .value { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
         .stat-card .label { font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem; }
         .stat-card.danger .value { color: var(--danger); }
@@ -59,22 +94,29 @@
         .stat-card.success .value { color: var(--success); }
 
         .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .class-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+        .class-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
         .class-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text); }
-        .class-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.82rem; border-bottom: 1px solid #f1f5f9; }
+        .class-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.82rem; border-bottom: 1px solid var(--hover-bg); }
         .class-row:last-child { border-bottom: none; }
         .class-label { color: var(--text-light); }
         .class-value { font-weight: 600; }
 
-        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); max-height: 75vh; }
+        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+        .table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+        .table-wrapper.paginated { max-height: none; }
+        .table-wrapper.scroll-mode { max-height: 75vh; }
         table { width: 100%; border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; }
-        thead th { background: #f1f5f9; padding: 0.5rem 0.55rem; text-align: left; font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--border); position: sticky; top: 0; cursor: pointer; user-select: none; z-index: 2; }
-        thead th:hover { background: #e2e8f0; }
+        thead th { background: var(--hover-bg); padding: 0.5rem 0.55rem; text-align: left; font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--border); position: sticky; top: 0; cursor: pointer; user-select: none; z-index: 2; transition: background 0.15s; }
+        thead th:hover { background: var(--border); }
         thead th.sorted-asc::after { content: " \u25B2"; font-size: 0.6rem; }
         thead th.sorted-desc::after { content: " \u25BC"; font-size: 0.6rem; }
-        thead th.month-col { background: #eef2ff; color: #4338ca; font-size: 0.7rem; min-width: 38px; text-align: right; }
+        thead th.month-col { background: rgba(37,99,235,0.08); color: var(--primary); font-size: 0.7rem; min-width: 38px; text-align: right; }
+        [data-theme="dark"] thead th.month-col { background: rgba(96,165,250,0.1); }
         tbody td { padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); }
-        tbody tr:hover { background: #f8fafc; }
+        tbody tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+        [data-theme="dark"] tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        tbody tr:hover { background: rgba(37,99,235,0.04); }
+        [data-theme="dark"] tbody tr:hover { background: rgba(96,165,250,0.08); }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
 
@@ -84,56 +126,66 @@
         .badge-reponer { background: #eff6ff; color: #2563eb; }
         .badge-ok { background: #f0fdf4; color: #16a34a; }
         .badge-sinventas { background: #f8fafc; color: #94a3b8; }
+        [data-theme="dark"] .badge-critico { background: rgba(220,38,38,0.15); }
+        [data-theme="dark"] .badge-bajo { background: rgba(245,158,11,0.15); }
+        [data-theme="dark"] .badge-reponer { background: rgba(37,99,235,0.15); }
+        [data-theme="dark"] .badge-ok { background: rgba(22,163,74,0.15); }
+        [data-theme="dark"] .badge-sinventas { background: rgba(148,163,184,0.1); }
         .badge-abc-a { background: #fef2f2; color: #dc2626; }
         .badge-abc-b { background: #fffbeb; color: #d97706; }
         .badge-abc-c { background: #f0fdf4; color: #16a34a; }
+        [data-theme="dark"] .badge-abc-a { background: rgba(220,38,38,0.15); }
+        [data-theme="dark"] .badge-abc-b { background: rgba(245,158,11,0.15); }
+        [data-theme="dark"] .badge-abc-c { background: rgba(22,163,74,0.15); }
         .badge-demand { background: #f1f5f9; color: var(--text-light); font-size: 0.66rem; }
         .badge-demand.suave { background: #f0fdf4; color: #16a34a; }
         .badge-demand.erratica { background: #fffbeb; color: #d97706; }
         .badge-demand.intermitente { background: #eff6ff; color: #2563eb; }
         .badge-demand.irregular { background: #fef2f2; color: #dc2626; }
+        [data-theme="dark"] .badge-demand.suave { background: rgba(22,163,74,0.15); }
+        [data-theme="dark"] .badge-demand.erratica { background: rgba(245,158,11,0.15); }
+        [data-theme="dark"] .badge-demand.intermitente { background: rgba(37,99,235,0.15); }
+        [data-theme="dark"] .badge-demand.irregular { background: rgba(220,38,38,0.15); }
 
-        .highlight-row { background: #fef2f2 !important; }
+        .highlight-row { background: rgba(220,38,38,0.04) !important; }
+        [data-theme="dark"] .highlight-row { background: rgba(220,38,38,0.08) !important; }
 
         .month-val { font-size: 0.75rem; color: var(--text); text-align: right; }
         .month-val.zero { color: #cbd5e1; }
+        [data-theme="dark"] .month-val.zero { color: #475569; }
         .month-val.high { color: var(--primary); font-weight: 600; }
         .month-val.excl { color: #d1d5db; text-decoration: line-through; }
-        .month-excluded { background: #fef9f0 !important; }
-        thead th.month-excluded { background: #fef3c7 !important; color: #92400e !important; }
+        .month-excluded { background: rgba(245,158,11,0.06) !important; }
+        thead th.month-excluded { background: rgba(245,158,11,0.12) !important; color: #92400e !important; }
+        [data-theme="dark"] thead th.month-excluded { color: #fbbf24 !important; }
 
-        /* Editable order qty */
         .order-input {
-            width: 58px;
-            padding: 0.2rem 0.35rem;
-            border: 1.5px solid var(--border);
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-align: right;
-            background: white;
-            transition: all 0.2s;
+            width: 62px; padding: 0.25rem 0.4rem;
+            border: 1.5px solid var(--border); border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600; text-align: right;
+            background: var(--card); color: var(--text); transition: all 0.2s;
         }
         .order-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
-        .order-input.edited { border-color: #f59e0b; background: #fffbeb; }
-        .order-input.zero { color: #94a3b8; }
-
+        .order-input.edited { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+        .order-input.zero { color: var(--muted); }
         .edit-indicator { font-size: 0.65rem; color: #f59e0b; font-weight: 600; margin-left: 2px; }
         .order-value-cell { font-weight: 600; }
         .order-value-cell.edited { color: #d97706; }
 
         .loading { display: none; text-align: center; padding: 2rem; color: var(--text-light); }
         .loading.active { display: block; }
-        .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .progress-container { max-width: 400px; margin: 0 auto; }
+        .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 0.75rem; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 3px; transition: width 0.5s ease; width: 0%; }
+        .progress-text { font-size: 0.85rem; }
         #results { display: none; }
 
         .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-        .filter-bar input, .filter-bar select { padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.83rem; }
-        .filter-bar input[type="text"] { width: 220px; }
+        .filter-bar input, .filter-bar select { padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.83rem; background: var(--card); color: var(--text); }
+        .filter-bar input[type="text"] { width: 240px; }
         .export-info { font-size: 0.8rem; color: var(--text-light); margin-left: auto; }
 
-        .edit-banner { display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #92400e; align-items: center; gap: 0.75rem; }
+        .edit-banner { display: none; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--warning); align-items: center; gap: 0.75rem; }
         .edit-banner.active { display: flex; }
         .edit-banner .edit-count { font-weight: 700; }
 
@@ -144,28 +196,87 @@
             display: inline-flex; align-items: center; gap: 0.3rem;
             padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.78rem; font-weight: 500;
             cursor: pointer; user-select: none; transition: all 0.15s;
-            border: 1.5px solid var(--primary); background: #eff6ff; color: var(--primary);
+            border: 1.5px solid var(--primary); background: rgba(37,99,235,0.06); color: var(--primary);
         }
-        .month-chip:hover { background: #dbeafe; }
-        .month-chip.excluded { border-color: #e2e8f0; background: #f8fafc; color: #94a3b8; text-decoration: line-through; }
+        .month-chip:hover { background: rgba(37,99,235,0.12); }
+        .month-chip.excluded { border-color: var(--border); background: var(--bg); color: var(--muted); text-decoration: line-through; }
         .month-chip .chip-check { font-size: 0.7rem; }
 
-        .method-info { font-size: 0.72rem; color: var(--muted); margin-top: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); line-height: 1.7; }
+        .method-info { font-size: 0.72rem; color: var(--muted); margin-top: 1rem; padding: 0.75rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); line-height: 1.7; }
         .method-info strong { color: var(--text); }
+
+        /* Preset controls */
+        .preset-bar { display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .preset-bar label { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
+        .preset-bar select { padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: var(--card); color: var(--text); }
+
+        /* Column toggle dropdown */
+        .col-toggle-wrapper { position: relative; display: inline-block; }
+        .col-toggle-btn { cursor: pointer; }
+        .col-toggle-dropdown { display: none; position: absolute; right: 0; top: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-md); z-index: 100; padding: 0.5rem; min-width: 200px; max-height: 400px; overflow-y: auto; }
+        .col-toggle-dropdown.open { display: block; }
+        .col-toggle-dropdown label { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; font-size: 0.8rem; cursor: pointer; border-radius: 4px; color: var(--text); }
+        .col-toggle-dropdown label:hover { background: var(--hover-bg); }
+        .col-toggle-dropdown input { accent-color: var(--primary); }
+
+        /* Pagination */
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+        .pagination button { padding: 0.35rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; transition: all 0.15s; }
+        .pagination button:hover:not(:disabled) { background: var(--hover-bg); border-color: var(--primary); }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination button.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .pagination .page-info { font-size: 0.8rem; color: var(--text-light); }
+        .page-size-select { padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: var(--card); color: var(--text); }
+
+        /* Supplier grouping */
+        .supplier-group-header { background: rgba(37,99,235,0.06); font-weight: 600; }
+        .supplier-group-header td { padding: 0.6rem 0.55rem !important; color: var(--primary); font-size: 0.85rem; border-bottom: 2px solid var(--primary) !important; }
+        [data-theme="dark"] .supplier-group-header { background: rgba(96,165,250,0.08); }
+
+        /* Toast notifications */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-md); animation: slideIn 0.3s ease, fadeOut 0.3s ease 3.7s; max-width: 400px; display: flex; align-items: center; gap: 0.5rem; }
+        .toast-success { background: #065f46; color: #ecfdf5; }
+        .toast-error { background: #991b1b; color: #fef2f2; }
+        .toast-info { background: #1e40af; color: #eff6ff; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Print styles */
+        @media print {
+            .header, .upload-zone, .actions, .filter-bar, .edit-banner, .month-exclusion,
+            .method-info, .preset-bar, .pagination, .col-toggle-wrapper, .theme-toggle,
+            .table-controls, .btn { display: none !important; }
+            .panel { border: none; box-shadow: none; padding: 0.5rem 0; }
+            .table-wrapper { max-height: none !important; border: none; overflow: visible; }
+            table { font-size: 7pt; }
+            thead th { background: #eee !important; position: static; }
+            .stat-card { border: 1px solid #ccc; }
+            body { background: white; color: black; }
+        }
 
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             .params-grid { grid-template-columns: repeat(2, 1fr); }
             .summary-grid { grid-template-columns: repeat(2, 1fr); }
             .filter-bar input { width: 100%; }
+            .header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="header">
-        <div>
+        <div class="header-left">
             <h1>Calculadora de Pedidos de Reposici&oacute;n</h1>
-            <p>Suba archivo de inventario &bull; Configure par&aacute;metros &bull; Obtenga cantidades sugeridas con an&aacute;lisis avanzado de demanda</p>
+            <p>Suba archivo de inventario &bull; Configure par&aacute;metros &bull; Obtenga cantidades sugeridas</p>
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Oscuro</span>
+            </button>
         </div>
     </div>
 
@@ -175,8 +286,9 @@
             <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6h.1a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                 <p>Arrastre y suelte su archivo Excel aqu&iacute; o <strong>haga clic para buscar</strong></p>
-                <p style="font-size:0.75rem; margin-top:0.3rem;">Soporta archivos .xlsx y .xls</p>
+                <p style="font-size:0.75rem; margin-top:0.3rem;">Soporta archivos .xlsx y .xls (m&aacute;x 50MB)</p>
                 <div class="filename" id="fileName"></div>
+                <div class="filesize" id="fileSize"></div>
             </div>
             <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
         </div>
@@ -231,15 +343,26 @@
             </div>
 
             <div class="month-exclusion">
-                <label class="month-excl-title">Excluir Meses del An&aacute;lisis <span class="param-hint" style="display:inline">(desmarque los meses que no desea incluir, ej: Nov/Dic para art&iacute;culos no estacionales)</span></label>
+                <label class="month-excl-title">Excluir Meses del An&aacute;lisis <span class="param-hint" style="display:inline">(desmarque los meses que no desea incluir)</span></label>
                 <div class="month-chips" id="monthChips"></div>
             </div>
 
             <div class="actions">
                 <button class="btn btn-primary" id="calcBtn" disabled onclick="calculate()">Calcular Pedidos</button>
-                <button class="btn btn-secondary" id="exportBtn" style="display:none" onclick="exportCSV()">Exportar CSV</button>
-                <button class="btn btn-warning" id="resetBtn" style="display:none" onclick="resetEdits()">Restaurar Cantidades Sugeridas</button>
+                <button class="btn btn-secondary" id="exportCsvBtn" style="display:none" onclick="exportCSV()">Exportar CSV</button>
+                <button class="btn btn-success" id="exportXlsxBtn" style="display:none" onclick="exportXLSX()">Exportar Excel</button>
+                <button class="btn btn-warning" id="resetBtn" style="display:none" onclick="resetEdits()">Restaurar Cantidades</button>
             </div>
+
+            <div class="preset-bar">
+                <label>Preset:</label>
+                <select id="presetSelect" onchange="loadPreset()">
+                    <option value="">-- Seleccionar --</option>
+                </select>
+                <button class="btn btn-sm btn-secondary" onclick="savePreset()">Guardar</button>
+                <button class="btn btn-sm btn-secondary" onclick="deletePreset()">Eliminar</button>
+            </div>
+
             <div class="method-info">
                 <strong>M&eacute;todos:</strong>
                 <strong>Suave/Err&aacute;tica</strong> &rarr; Promedio m&oacute;vil &nbsp;|&nbsp;
@@ -251,8 +374,10 @@
         </div>
 
         <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Analizando datos de inventario...</p>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <p class="progress-text" id="progressText">Preparando...</p>
+            </div>
         </div>
 
         <div id="results">
@@ -270,96 +395,120 @@
                     <span>Los totales se actualizan autom&aacute;ticamente.</span>
                 </div>
 
-                <div class="filter-bar">
-                    <input type="text" id="searchInput" placeholder="Buscar material, descripci&oacute;n, marca..." oninput="filterTable()">
-                    <select id="statusFilter" onchange="filterTable()">
-                        <option value="">Todos los Estados</option>
-                        <option value="Cr\u00edtico">Cr&iacute;tico</option>
-                        <option value="Bajo">Bajo</option>
-                        <option value="Reponer">Reponer</option>
-                        <option value="OK">OK</option>
-                        <option value="Sin Ventas">Sin Ventas</option>
-                    </select>
-                    <select id="demandFilter" onchange="filterTable()">
-                        <option value="">Todos los Patrones</option>
-                        <option value="Suave">Suave</option>
-                        <option value="Err\u00e1tica">Err&aacute;tica</option>
-                        <option value="Intermitente">Intermitente</option>
-                        <option value="Irregular">Irregular</option>
-                        <option value="Sin Demanda">Sin Demanda</option>
-                    </select>
-                    <select id="abcFilter" onchange="filterTable()">
-                        <option value="">Todas las Clases</option>
-                        <option value="A">ABC: A</option>
-                        <option value="B">ABC: B</option>
-                        <option value="C">ABC: C</option>
-                    </select>
-                    <select id="orderFilter" onchange="filterTable()">
-                        <option value="">Todos</option>
-                        <option value="needs_order">Necesita Pedido</option>
-                        <option value="no_order">No Necesita</option>
-                        <option value="edited">Editados</option>
-                    </select>
+                <div class="table-controls">
+                    <div class="filter-bar" style="margin-bottom:0">
+                        <input type="text" id="searchInput" placeholder="Buscar material, descripci&oacute;n, marca..." oninput="debouncedFilter()">
+                        <select id="statusFilter" onchange="filterTable()">
+                            <option value="">Todos los Estados</option>
+                            <option value="Cr\u00edtico">Cr&iacute;tico</option>
+                            <option value="Bajo">Bajo</option>
+                            <option value="Reponer">Reponer</option>
+                            <option value="OK">OK</option>
+                            <option value="Sin Ventas">Sin Ventas</option>
+                        </select>
+                        <select id="demandFilter" onchange="filterTable()">
+                            <option value="">Todos los Patrones</option>
+                            <option value="Suave">Suave</option>
+                            <option value="Err\u00e1tica">Err&aacute;tica</option>
+                            <option value="Intermitente">Intermitente</option>
+                            <option value="Irregular">Irregular</option>
+                            <option value="Sin Demanda">Sin Demanda</option>
+                        </select>
+                        <select id="abcFilter" onchange="filterTable()">
+                            <option value="">Todas las Clases</option>
+                            <option value="A">ABC: A</option>
+                            <option value="B">ABC: B</option>
+                            <option value="C">ABC: C</option>
+                        </select>
+                        <select id="orderFilter" onchange="filterTable()">
+                            <option value="">Todos</option>
+                            <option value="needs_order">Necesita Pedido</option>
+                            <option value="no_order">No Necesita</option>
+                            <option value="edited">Editados</option>
+                        </select>
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;color:var(--text-light)">
+                            <input type="checkbox" id="groupBySupplier" onchange="filterTable()"> Agrupar por Proveedor
+                        </label>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <div class="col-toggle-wrapper">
+                            <button class="btn btn-sm btn-secondary col-toggle-btn" onclick="toggleColDropdown()">Columnas</button>
+                            <div class="col-toggle-dropdown" id="colDropdown"></div>
+                        </div>
+                        <select class="page-size-select" id="pageSizeSelect" onchange="changePageSize()">
+                            <option value="50">50 filas</option>
+                            <option value="100" selected>100 filas</option>
+                            <option value="250">250 filas</option>
+                            <option value="0">Todas</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="table-wrapper">
+                <div class="table-wrapper" id="tableWrapper">
                     <table>
                         <thead id="tableHead"></thead>
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination" id="pagination"></div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script>
+        // ─── State ───
         let currentData = null;
         let currentFile = null;
         let sortCol = null;
         let sortDir = "asc";
         let userEdits = {};
-
-        // Excluded months: set of 0-based indices (0=Vta01=most recent, 11=Vta12=oldest)
         let excludedMonths = new Set();
+        let currentPage = 1;
+        let pageSize = 100;
+        let filteredItems = [];
+        let hiddenCols = new Set();
+        let filterTimeout = null;
 
-        // Map Vta index to actual calendar month name
-        // Vta 01 = last complete month. Current date determines the mapping.
         const MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+        const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-        function buildMonthChips() {
-            const now = new Date();
-            // Vta 01 = previous complete month
-            let refMonth = now.getMonth() - 1; // 0-indexed (0=Jan)
-            let refYear = now.getFullYear();
-            if (refMonth < 0) { refMonth = 11; refYear--; }
+        // ─── Theme ───
+        function initTheme() {
+            const saved = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", saved);
+            updateThemeUI(saved);
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute("data-theme");
+            const next = current === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+            updateThemeUI(next);
+        }
+        function updateThemeUI(theme) {
+            document.getElementById("themeIcon").textContent = theme === "dark" ? "\u2600" : "\u263D";
+            document.getElementById("themeLabel").textContent = theme === "dark" ? "Claro" : "Oscuro";
+        }
+        initTheme();
 
-            const container = document.getElementById("monthChips");
-            container.innerHTML = "";
-
-            for (let i = 0; i < 12; i++) {
-                let m = refMonth - i;
-                let y = refYear;
-                while (m < 0) { m += 12; y--; }
-
-                const label = `${MONTH_NAMES_ES[m]} ${String(y).slice(2)}`;
-                const chip = document.createElement("span");
-                chip.className = "month-chip" + (excludedMonths.has(i) ? " excluded" : "");
-                chip.dataset.index = i;
-                chip.innerHTML = `<span class="chip-check">${excludedMonths.has(i) ? "\u2717" : "\u2713"}</span> ${label}`;
-                chip.title = `Vta ${String(i+1).padStart(2,"0")} \u2014 clic para ${excludedMonths.has(i) ? "incluir" : "excluir"}`;
-                chip.onclick = () => toggleMonth(i);
-                container.appendChild(chip);
-            }
+        // ─── Toast ───
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.className = `toast toast-${type}`;
+            const icons = { success: "\u2713", error: "\u2717", info: "\u2139" };
+            toast.innerHTML = `<span>${icons[type] || ""}</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
         }
 
-        function toggleMonth(idx) {
-            if (excludedMonths.has(idx)) excludedMonths.delete(idx);
-            else excludedMonths.add(idx);
-            buildMonthChips();
+        // ─── File Handling ───
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + " B";
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+            return (bytes / (1024 * 1024)).toFixed(1) + " MB";
         }
-
-        // Initialize chips on load
-        buildMonthChips();
 
         const dropZone = document.getElementById("dropZone");
         const fileInput = document.getElementById("fileInput");
@@ -374,12 +523,114 @@
         fileInput.addEventListener("change", e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
         function handleFile(file) {
-            if (!file.name.match(/\.xlsx?$/i)) { alert("Por favor seleccione un archivo Excel (.xlsx o .xls)"); return; }
+            if (!file.name.match(/\.xlsx?$/i)) {
+                showToast("Por favor seleccione un archivo Excel (.xlsx o .xls)", "error");
+                return;
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                showToast(`El archivo excede el l\u00edmite de ${MAX_FILE_SIZE / (1024*1024)}MB`, "error");
+                return;
+            }
             currentFile = file;
             document.getElementById("fileName").textContent = file.name;
+            document.getElementById("fileSize").textContent = formatFileSize(file.size);
             document.getElementById("calcBtn").disabled = false;
+            showToast("Archivo cargado: " + file.name, "success");
         }
 
+        // ─── Month Chips ───
+        function buildMonthChips() {
+            const now = new Date();
+            let refMonth = now.getMonth() - 1;
+            let refYear = now.getFullYear();
+            if (refMonth < 0) { refMonth = 11; refYear--; }
+            const container = document.getElementById("monthChips");
+            container.innerHTML = "";
+            for (let i = 0; i < 12; i++) {
+                let m = refMonth - i;
+                let y = refYear;
+                while (m < 0) { m += 12; y--; }
+                const label = `${MONTH_NAMES_ES[m]} ${String(y).slice(2)}`;
+                const chip = document.createElement("span");
+                chip.className = "month-chip" + (excludedMonths.has(i) ? " excluded" : "");
+                chip.dataset.index = i;
+                chip.innerHTML = `<span class="chip-check">${excludedMonths.has(i) ? "\u2717" : "\u2713"}</span> ${label}`;
+                chip.title = `Vta ${String(i+1).padStart(2,"0")}`;
+                chip.onclick = () => { toggleMonth(i); };
+                container.appendChild(chip);
+            }
+        }
+        function toggleMonth(idx) {
+            if (excludedMonths.has(idx)) excludedMonths.delete(idx);
+            else excludedMonths.add(idx);
+            buildMonthChips();
+        }
+        buildMonthChips();
+
+        // ─── Presets ───
+        function getPresets() {
+            try { return JSON.parse(localStorage.getItem("orderPresets") || "{}"); } catch { return {}; }
+        }
+        function refreshPresetList() {
+            const sel = document.getElementById("presetSelect");
+            const presets = getPresets();
+            sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+            Object.keys(presets).forEach(name => {
+                sel.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+        function savePreset() {
+            const name = prompt("Nombre del preset:");
+            if (!name) return;
+            const presets = getPresets();
+            presets[name] = {
+                leadTime: document.getElementById("leadTime").value,
+                targetStock: document.getElementById("targetStock").value,
+                serviceLevel: document.getElementById("serviceLevel").value,
+                salesMonths: document.getElementById("salesMonths").value,
+                minOrder: document.getElementById("minOrder").value,
+                rounding: document.getElementById("rounding").value,
+                excludedMonths: [...excludedMonths],
+            };
+            localStorage.setItem("orderPresets", JSON.stringify(presets));
+            refreshPresetList();
+            document.getElementById("presetSelect").value = name;
+            showToast("Preset guardado: " + name, "success");
+        }
+        function loadPreset() {
+            const name = document.getElementById("presetSelect").value;
+            if (!name) return;
+            const presets = getPresets();
+            const p = presets[name];
+            if (!p) return;
+            document.getElementById("leadTime").value = p.leadTime;
+            document.getElementById("targetStock").value = p.targetStock;
+            document.getElementById("serviceLevel").value = p.serviceLevel;
+            document.getElementById("salesMonths").value = p.salesMonths;
+            document.getElementById("minOrder").value = p.minOrder;
+            document.getElementById("rounding").value = p.rounding;
+            excludedMonths = new Set(p.excludedMonths || []);
+            buildMonthChips();
+            showToast("Preset cargado: " + name, "info");
+        }
+        function deletePreset() {
+            const name = document.getElementById("presetSelect").value;
+            if (!name) return;
+            const presets = getPresets();
+            delete presets[name];
+            localStorage.setItem("orderPresets", JSON.stringify(presets));
+            refreshPresetList();
+            showToast("Preset eliminado", "info");
+        }
+        refreshPresetList();
+
+        // ─── Progress Bar ───
+        function setProgress(pct, text) {
+            document.getElementById("progressFill").style.width = pct + "%";
+            document.getElementById("progressText").textContent = text;
+        }
+
+        // ─── Calculate ───
         function calculate() {
             if (!currentFile) return;
             const fd = new FormData();
@@ -394,31 +645,56 @@
 
             document.getElementById("loading").classList.add("active");
             document.getElementById("results").style.display = "none";
+            setProgress(10, "Subiendo archivo...");
 
-            fetch("/api/upload", { method: "POST", body: fd })
-                .then(r => r.json())
-                .then(data => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/upload");
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 50);
+                    setProgress(pct, "Subiendo archivo... " + Math.round(e.loaded / e.total * 100) + "%");
+                }
+            };
+
+            xhr.onload = () => {
+                setProgress(80, "Procesando resultados...");
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.error) {
+                        document.getElementById("loading").classList.remove("active");
+                        showToast("Error: " + data.error, "error");
+                        return;
+                    }
+                    setProgress(100, "Renderizando tabla...");
+                    setTimeout(() => {
+                        currentData = data;
+                        userEdits = {};
+                        updateEditBanner();
+                        renderResults(data);
+                        document.getElementById("loading").classList.remove("active");
+                        showToast(`An\u00e1lisis completo: ${data.summary.total_items} SKUs procesados`, "success");
+                    }, 100);
+                } catch (e) {
                     document.getElementById("loading").classList.remove("active");
-                    if (data.error) { alert("Error: " + data.error); return; }
-                    currentData = data;
-                    userEdits = {};
-                    updateEditBanner();
-                    renderResults(data);
-                })
-                .catch(err => {
-                    document.getElementById("loading").classList.remove("active");
-                    alert("Error: " + err.message);
-                });
+                    showToast("Error al procesar respuesta del servidor", "error");
+                }
+            };
+
+            xhr.onerror = () => {
+                document.getElementById("loading").classList.remove("active");
+                showToast("Error de conexi\u00f3n con el servidor", "error");
+            };
+
+            xhr.send(fd);
         }
 
+        // ─── Edits ───
         function getEffectiveQty(r) {
             if (userEdits[r.material] !== undefined) return userEdits[r.material];
             return r.suggested_qty;
         }
-
-        function getEffectiveValue(r) {
-            return getEffectiveQty(r) * r.fob;
-        }
+        function getEffectiveValue(r) { return getEffectiveQty(r) * r.fob; }
 
         function updateSummaryTotals() {
             if (!currentData) return;
@@ -426,7 +702,6 @@
             const totalUnits = results.reduce((s, r) => s + getEffectiveQty(r), 0);
             const totalValue = results.reduce((s, r) => s + getEffectiveValue(r), 0);
             const itemsToOrder = results.filter(r => getEffectiveQty(r) > 0).length;
-
             const el = document.getElementById("summaryGrid");
             if (!el) return;
             const cards = el.querySelectorAll(".stat-card");
@@ -456,7 +731,6 @@
             inputEl.value = newVal;
             const original = currentData.results.find(r => r.material === material);
             if (!original) return;
-
             if (newVal !== original.suggested_qty) {
                 userEdits[material] = newVal;
                 inputEl.classList.add("edited");
@@ -465,15 +739,12 @@
                 inputEl.classList.remove("edited");
             }
             inputEl.classList.toggle("zero", newVal === 0);
-
-            // Update order value in same row
-            const valueCell = document.getElementById("val_" + material);
+            const valueCell = document.getElementById("val_" + CSS.escape(material));
             if (valueCell) {
                 const newValue = newVal * original.fob;
                 valueCell.textContent = "$" + newValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
                 valueCell.classList.toggle("edited", userEdits[material] !== undefined);
             }
-
             updateEditBanner();
             updateSummaryTotals();
         }
@@ -485,19 +756,21 @@
             updateSummaryTotals();
         }
 
+        // ─── Render Results ───
         function renderResults(data) {
             document.getElementById("results").style.display = "block";
-            document.getElementById("exportBtn").style.display = "inline-flex";
+            document.getElementById("exportCsvBtn").style.display = "inline-flex";
+            document.getElementById("exportXlsxBtn").style.display = "inline-flex";
 
             const s = data.summary;
             document.getElementById("summaryGrid").innerHTML = `
-                <div class="stat-card"><div class="value">${s.total_items}</div><div class="label">Total SKUs</div></div>
-                <div class="stat-card" style="border-left:3px solid var(--primary)"><div class="value">${s.items_to_order}</div><div class="label">Art\u00edculos a Pedir</div></div>
-                <div class="stat-card"><div class="value">${s.total_units.toLocaleString()}</div><div class="label">Unidades Totales</div></div>
-                <div class="stat-card danger"><div class="value">${s.critical_items}</div><div class="label">Stock Cr\u00edtico</div></div>
-                <div class="stat-card warning"><div class="value">${s.low_items}</div><div class="label">Stock Bajo</div></div>
-                <div class="stat-card success"><div class="value">$${s.total_order_value_fob.toLocaleString()}</div><div class="label">Valor Total (FOB)</div></div>
-                <div class="stat-card"><div class="value">${s.no_sales_items}</div><div class="label">Sin Ventas</div></div>
+                <div class="stat-card"><div class="stat-icon">&#128230;</div><div class="value">${s.total_items}</div><div class="label">Total SKUs</div></div>
+                <div class="stat-card" style="border-left:3px solid var(--primary)"><div class="stat-icon">&#128722;</div><div class="value">${s.items_to_order}</div><div class="label">Art\u00edculos a Pedir</div></div>
+                <div class="stat-card"><div class="stat-icon">&#128229;</div><div class="value">${s.total_units.toLocaleString()}</div><div class="label">Unidades Totales</div></div>
+                <div class="stat-card danger"><div class="stat-icon">&#9888;</div><div class="value">${s.critical_items}</div><div class="label">Stock Cr\u00edtico</div></div>
+                <div class="stat-card warning"><div class="stat-icon">&#128312;</div><div class="value">${s.low_items}</div><div class="label">Stock Bajo</div></div>
+                <div class="stat-card success"><div class="stat-icon">&#128176;</div><div class="value">$${s.total_order_value_fob.toLocaleString(undefined,{minimumFractionDigits:2})}</div><div class="label">Valor Total (FOB)</div></div>
+                <div class="stat-card"><div class="stat-icon">&#128683;</div><div class="value">${s.no_sales_items}</div><div class="label">Sin Ventas</div></div>
             `;
 
             const dp = s.demand_pattern_counts;
@@ -516,147 +789,163 @@
                     <h3>Leyenda</h3>
                     <div class="class-row"><span class="class-label"><strong>ABC</strong>: A=80% valor, B=95%, C=resto</span></div>
                     <div class="class-row"><span class="class-label"><strong>XYZ</strong>: X=estable, Y=variable, Z=impredecible</span></div>
-                    <div class="class-row"><span class="class-label"><strong>Suave</strong>: frecuente y estable &nbsp; <strong>Err\u00e1tica</strong>: frecuente, variable</span></div>
-                    <div class="class-row"><span class="class-label"><strong>Intermitente</strong>: espor\u00e1dica, consistente &nbsp; <strong>Irregular</strong>: espor\u00e1dica, variable</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Suave</strong>: frecuente y estable</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Err\u00e1tica</strong>: frecuente, variable</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Intermitente</strong>: espor\u00e1dica, consistente</span></div>
+                    <div class="class-row"><span class="class-label"><strong>Irregular</strong>: espor\u00e1dica, variable</span></div>
                 </div>
             `;
 
-            renderTable(data.results);
+            buildColToggle();
+            currentPage = 1;
+            filterTable();
         }
 
+        // ─── Column Definitions ───
         const baseCols = [
-            { key: "status", label: "Estado", align: "center" },
-            { key: "abc_xyz", label: "ABC-XYZ", align: "center" },
-            { key: "demand_pattern", label: "Patr\u00f3n", align: "center" },
-            { key: "material", label: "Material" },
-            { key: "marca", label: "Marca" },
-            { key: "descripcion", label: "Descripci\u00f3n" },
-            { key: "fecha_compra", label: "\u00dalt. Compra", align: "center" },
-            { key: "cant_compra", label: "Cant. Comp.", align: "right" },
-            { key: "stock_cedi", label: "CEDI", align: "right" },
-            { key: "stock_tiendas", label: "Tiendas", align: "right" },
-            { key: "stock_total", label: "Stock", align: "right" },
+            { key: "status", label: "Estado", align: "center", group: "Info" },
+            { key: "abc_xyz", label: "ABC-XYZ", align: "center", group: "Info" },
+            { key: "demand_pattern", label: "Patr\u00f3n", align: "center", group: "Info" },
+            { key: "material", label: "Material", group: "Info" },
+            { key: "marca", label: "Marca", group: "Info" },
+            { key: "cod_proveedor", label: "Proveedor", group: "Info" },
+            { key: "descripcion", label: "Descripci\u00f3n", group: "Info" },
+            { key: "fecha_compra", label: "\u00dalt. Compra", align: "center", group: "Compra" },
+            { key: "cant_compra", label: "Cant. Comp.", align: "right", group: "Compra" },
+            { key: "stock_cedi", label: "CEDI", align: "right", group: "Stock" },
+            { key: "stock_tiendas", label: "Tiendas", align: "right", group: "Stock" },
+            { key: "stock_total", label: "Stock", align: "right", group: "Stock" },
         ];
 
         const afterMonthCols = [
-            { key: "avg_monthly_sales", label: "Pron\u00f3stico", align: "right" },
-            { key: "forecast_method", label: "M\u00e9todo", align: "center" },
-            { key: "months_of_stock", label: "Meses Stock", align: "right" },
-            { key: "safety_stock_units", label: "Stock Seg.", align: "right" },
-            { key: "rop", label: "ROP", align: "right" },
-            { key: "suggested_qty", label: "Cant. Pedido", align: "right" },
-            { key: "fob", label: "FOB $", align: "right" },
-            { key: "order_value_fob", label: "Valor $", align: "right" },
+            { key: "avg_monthly_sales", label: "Pron\u00f3stico", align: "right", group: "C\u00e1lculo" },
+            { key: "forecast_method", label: "M\u00e9todo", align: "center", group: "C\u00e1lculo" },
+            { key: "months_of_stock", label: "Meses Stock", align: "right", group: "C\u00e1lculo" },
+            { key: "safety_stock_units", label: "Stock Seg.", align: "right", group: "C\u00e1lculo" },
+            { key: "rop", label: "ROP", align: "right", group: "C\u00e1lculo" },
+            { key: "suggested_qty", label: "Cant. Pedido", align: "right", group: "Pedido" },
+            { key: "fob", label: "FOB $", align: "right", group: "Pedido" },
+            { key: "order_value_fob", label: "Valor $", align: "right", group: "Pedido" },
         ];
 
+        // ─── Column Toggle ───
+        function buildColToggle() {
+            const dd = document.getElementById("colDropdown");
+            dd.innerHTML = "";
+            const allCols = [...baseCols, ...afterMonthCols];
+            let lastGroup = "";
+            allCols.forEach(c => {
+                if (c.group && c.group !== lastGroup) {
+                    const h = document.createElement("div");
+                    h.style.cssText = "font-size:0.7rem;font-weight:700;color:var(--muted);padding:0.4rem 0.5rem 0.1rem;text-transform:uppercase;";
+                    h.textContent = c.group;
+                    dd.appendChild(h);
+                    lastGroup = c.group;
+                }
+                const lbl = document.createElement("label");
+                const chk = document.createElement("input");
+                chk.type = "checkbox";
+                chk.checked = !hiddenCols.has(c.key);
+                chk.onchange = () => {
+                    if (chk.checked) hiddenCols.delete(c.key);
+                    else hiddenCols.add(c.key);
+                    filterTable();
+                };
+                lbl.appendChild(chk);
+                lbl.appendChild(document.createTextNode(" " + c.label));
+                dd.appendChild(lbl);
+            });
+            // Month columns toggle
+            const mh = document.createElement("div");
+            mh.style.cssText = "font-size:0.7rem;font-weight:700;color:var(--muted);padding:0.4rem 0.5rem 0.1rem;text-transform:uppercase;";
+            mh.textContent = "Meses";
+            dd.appendChild(mh);
+            const mlbl = document.createElement("label");
+            const mchk = document.createElement("input");
+            mchk.type = "checkbox";
+            mchk.checked = !hiddenCols.has("_months");
+            mchk.onchange = () => {
+                if (mchk.checked) hiddenCols.delete("_months");
+                else hiddenCols.add("_months");
+                filterTable();
+            };
+            mlbl.appendChild(mchk);
+            mlbl.appendChild(document.createTextNode(" Ventas Mensuales (12 meses)"));
+            dd.appendChild(mlbl);
+        }
+
+        function toggleColDropdown() {
+            document.getElementById("colDropdown").classList.toggle("open");
+        }
+        document.addEventListener("click", e => {
+            if (!e.target.closest(".col-toggle-wrapper")) {
+                document.getElementById("colDropdown").classList.remove("open");
+            }
+        });
+
+        // ─── Month Labels ───
         function getMonthLabel(vtaIndex) {
-            // vtaIndex: 0=Vta01(most recent), 11=Vta12(oldest)
             const now = new Date();
-            let m = now.getMonth() - 1 - vtaIndex; // Vta01 = prev complete month
+            let m = now.getMonth() - 1 - vtaIndex;
             let y = now.getFullYear();
             while (m < 0) { m += 12; y--; }
             return MONTH_NAMES_ES[m % 12] + " " + String(y).slice(2);
         }
 
-        function renderTable(items) {
-            const thead = document.getElementById("tableHead");
-
-            let headerHtml = "<tr>";
-            baseCols.forEach(c => {
-                let cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
-                let sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
-                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
-            });
-            // Month headers (oldest first: i=11 down to i=0)
-            for (let i = 11; i >= 0; i--) {
-                const isExcl = excludedMonths.has(i);
-                headerHtml += `<th class="month-col text-right${isExcl ? ' month-excluded' : ''}">${getMonthLabel(i)}</th>`;
-            }
-            afterMonthCols.forEach(c => {
-                let cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
-                let sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
-                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
-            });
-            headerHtml += "</tr>";
-            thead.innerHTML = headerHtml;
-
-            const tbody = document.getElementById("tableBody");
-            tbody.innerHTML = items.map(r => {
-                const rowCls = r.status === "Cr\u00edtico" ? " class='highlight-row'" : "";
-                let html = `<tr${rowCls}>`;
-
-                // Base columns
-                baseCols.forEach(c => {
-                    let cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
-                    html += `<td${cls}>${renderCell(c.key, r)}</td>`;
-                });
-
-                // Monthly sales (12 months, oldest to newest)
-                const allSales = r.monthly_sales_all || r.monthly_sales || [];
-                for (let i = 11; i >= 0; i--) {
-                    const v = allSales[i] !== undefined ? allSales[i] : 0;
-                    const intV = Math.round(v);
-                    const isExcl = excludedMonths.has(i);
-                    let cls = "month-val";
-                    if (isExcl) cls += " excl";
-                    else if (intV === 0) cls += " zero";
-                    else if (intV >= 3) cls += " high";
-                    html += `<td class="text-right${isExcl ? ' month-excluded' : ''}"><span class="${cls}">${intV}</span></td>`;
-                }
-
-                // After-month columns
-                afterMonthCols.forEach(c => {
-                    let cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
-                    html += `<td${cls}>${renderCell(c.key, r)}</td>`;
-                });
-
-                html += "</tr>";
-                return html;
-            }).join("");
-
-            document.getElementById("itemCount").textContent = `Mostrando ${items.length} art\u00edculos`;
+        // ─── Debounced Filter ───
+        function debouncedFilter() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(filterTable, 200);
         }
 
-        function renderCell(key, r) {
-            if (key === "status") {
-                const m = { "Cr\u00edtico": "badge-critico", "Bajo": "badge-bajo", "Reponer": "badge-reponer", "OK": "badge-ok", "Sin Ventas": "badge-sinventas" };
-                return `<span class="badge ${m[r.status] || ''}">${r.status}</span>`;
-            }
-            if (key === "abc_xyz") {
-                const abcCls = { A: "badge-abc-a", B: "badge-abc-b", C: "badge-abc-c" }[r.abc] || "";
-                return `<span class="badge ${abcCls}">${r.abc_xyz}</span>`;
-            }
-            if (key === "demand_pattern") {
-                const dpCls = { "Suave": "suave", "Err\u00e1tica": "erratica", "Intermitente": "intermitente", "Irregular": "irregular" }[r.demand_pattern] || "";
-                return `<span class="badge badge-demand ${dpCls}">${r.demand_pattern}</span>`;
-            }
-            if (key === "fob") return "$" + r.fob.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-            if (key === "order_value_fob") {
-                const effectiveVal = getEffectiveValue(r);
-                const isEdited = userEdits[r.material] !== undefined;
-                return `<span id="val_${r.material}" class="order-value-cell${isEdited ? ' edited' : ''}">$${effectiveVal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
-            }
-            if (key === "avg_monthly_sales") return r[key].toFixed(1);
-            if (key === "suggested_qty") {
-                const effectiveQty = getEffectiveQty(r);
-                const isEdited = userEdits[r.material] !== undefined;
-                return `<input type="number" class="order-input${isEdited ? ' edited' : ''}${effectiveQty === 0 ? ' zero' : ''}" value="${effectiveQty}" min="0" onchange="onOrderQtyChange('${r.material}', this)" onkeyup="if(event.key==='Enter')this.blur()">` +
-                       (isEdited ? `<span class="edit-indicator">*</span>` : '');
-            }
-            if (key === "forecast_method") return `<span style="font-size:0.7rem;color:var(--muted)">${r[key]}</span>`;
-            return r[key];
+        // ─── Pagination ───
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById("pageSizeSelect").value) || 0;
+            currentPage = 1;
+            const wrapper = document.getElementById("tableWrapper");
+            wrapper.className = pageSize === 0 ? "table-wrapper scroll-mode" : "table-wrapper paginated";
+            renderCurrentPage();
         }
 
-        function sortTable(key) {
-            if (sortCol === key) sortDir = sortDir === "asc" ? "desc" : "asc";
-            else { sortCol = key; sortDir = (key === "suggested_qty" || key === "status" || key === "order_value_fob") ? "desc" : "asc"; }
-            filterTable();
+        function renderPagination() {
+            const pg = document.getElementById("pagination");
+            if (pageSize === 0 || filteredItems.length <= pageSize) {
+                pg.innerHTML = "";
+                return;
+            }
+            const totalPages = Math.ceil(filteredItems.length / pageSize);
+            let html = `<button ${currentPage <= 1 ? "disabled" : ""} onclick="goToPage(${currentPage-1})">&laquo;</button>`;
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            html += `<button ${currentPage >= totalPages ? "disabled" : ""} onclick="goToPage(${currentPage+1})">&raquo;</button>`;
+            html += `<span class="page-info">${filteredItems.length} resultados</span>`;
+            pg.innerHTML = html;
         }
 
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredItems.length / pageSize);
+            currentPage = Math.max(1, Math.min(page, totalPages));
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            let items = filteredItems;
+            if (pageSize > 0) {
+                const start = (currentPage - 1) * pageSize;
+                items = filteredItems.slice(start, start + pageSize);
+            }
+            const groupBySupplier = document.getElementById("groupBySupplier").checked;
+            renderTable(items, groupBySupplier);
+            renderPagination();
+        }
+
+        // ─── Filter & Sort ───
         function filterTable() {
             if (!currentData) return;
             let items = [...currentData.results];
-
             const search = document.getElementById("searchInput").value.toLowerCase();
             const statusF = document.getElementById("statusFilter").value;
             const demandF = document.getElementById("demandFilter").value;
@@ -688,12 +977,136 @@
                     return sortDir === "asc" ? (va - vb) : (vb - va);
                 });
             }
-            renderTable(items);
+
+            filteredItems = items;
+            currentPage = 1;
+            renderCurrentPage();
+            document.getElementById("itemCount").textContent = `${items.length} de ${currentData.results.length} art\u00edculos`;
         }
 
+        function sortTable(key) {
+            if (sortCol === key) sortDir = sortDir === "asc" ? "desc" : "asc";
+            else { sortCol = key; sortDir = (key === "suggested_qty" || key === "status" || key === "order_value_fob") ? "desc" : "asc"; }
+            filterTable();
+        }
+
+        // ─── Render Table ───
+        function renderTable(items, groupBySupplier = false) {
+            const thead = document.getElementById("tableHead");
+            const visibleBase = baseCols.filter(c => !hiddenCols.has(c.key));
+            const visibleAfter = afterMonthCols.filter(c => !hiddenCols.has(c.key));
+            const showMonths = !hiddenCols.has("_months");
+
+            let headerHtml = "<tr>";
+            visibleBase.forEach(c => {
+                const cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
+                const sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
+                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
+            });
+            if (showMonths) {
+                for (let i = 11; i >= 0; i--) {
+                    const isExcl = excludedMonths.has(i);
+                    headerHtml += `<th class="month-col text-right${isExcl ? ' month-excluded' : ''}">${getMonthLabel(i)}</th>`;
+                }
+            }
+            visibleAfter.forEach(c => {
+                const cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
+                const sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
+                headerHtml += `<th class="${cls}${sortCls}" onclick="sortTable('${c.key}')">${c.label}</th>`;
+            });
+            headerHtml += "</tr>";
+            thead.innerHTML = headerHtml;
+
+            const totalVisibleCols = visibleBase.length + (showMonths ? 12 : 0) + visibleAfter.length;
+
+            const tbody = document.getElementById("tableBody");
+            let html = "";
+
+            if (groupBySupplier) {
+                const groups = {};
+                items.forEach(r => {
+                    const key = r.cod_proveedor || "Sin Proveedor";
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(r);
+                });
+                const sortedKeys = Object.keys(groups).sort();
+                for (const key of sortedKeys) {
+                    const groupItems = groups[key];
+                    const groupQty = groupItems.reduce((s, r) => s + getEffectiveQty(r), 0);
+                    const groupVal = groupItems.reduce((s, r) => s + getEffectiveValue(r), 0);
+                    html += `<tr class="supplier-group-header"><td colspan="${totalVisibleCols}">Proveedor: ${key} &mdash; ${groupItems.length} SKUs &mdash; ${groupQty.toLocaleString()} un. &mdash; $${groupVal.toLocaleString(undefined,{minimumFractionDigits:2})}</td></tr>`;
+                    groupItems.forEach(r => { html += buildRow(r, visibleBase, visibleAfter, showMonths); });
+                }
+            } else {
+                items.forEach(r => { html += buildRow(r, visibleBase, visibleAfter, showMonths); });
+            }
+            tbody.innerHTML = html;
+        }
+
+        function buildRow(r, visibleBase, visibleAfter, showMonths) {
+            const rowCls = r.status === "Cr\u00edtico" ? " class='highlight-row'" : "";
+            let html = `<tr${rowCls}>`;
+            visibleBase.forEach(c => {
+                const cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
+                html += `<td${cls}>${renderCell(c.key, r)}</td>`;
+            });
+            if (showMonths) {
+                const allSales = r.monthly_sales_all || r.monthly_sales || [];
+                for (let i = 11; i >= 0; i--) {
+                    const v = allSales[i] !== undefined ? allSales[i] : 0;
+                    const intV = Math.round(v);
+                    const isExcl = excludedMonths.has(i);
+                    let cls = "month-val";
+                    if (isExcl) cls += " excl";
+                    else if (intV === 0) cls += " zero";
+                    else if (intV >= 3) cls += " high";
+                    html += `<td class="text-right${isExcl ? ' month-excluded' : ''}"><span class="${cls}">${intV}</span></td>`;
+                }
+            }
+            visibleAfter.forEach(c => {
+                const cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
+                html += `<td${cls}>${renderCell(c.key, r)}</td>`;
+            });
+            html += "</tr>";
+            return html;
+        }
+
+        function renderCell(key, r) {
+            if (key === "status") {
+                const m = { "Cr\u00edtico": "badge-critico", "Bajo": "badge-bajo", "Reponer": "badge-reponer", "OK": "badge-ok", "Sin Ventas": "badge-sinventas" };
+                return `<span class="badge ${m[r.status] || ''}">${r.status}</span>`;
+            }
+            if (key === "abc_xyz") {
+                const abcCls = { A: "badge-abc-a", B: "badge-abc-b", C: "badge-abc-c" }[r.abc] || "";
+                return `<span class="badge ${abcCls}">${r.abc_xyz}</span>`;
+            }
+            if (key === "demand_pattern") {
+                const dpCls = { "Suave": "suave", "Err\u00e1tica": "erratica", "Intermitente": "intermitente", "Irregular": "irregular" }[r.demand_pattern] || "";
+                return `<span class="badge badge-demand ${dpCls}">${r.demand_pattern}</span>`;
+            }
+            if (key === "fob") return "$" + r.fob.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            if (key === "order_value_fob") {
+                const effectiveVal = getEffectiveValue(r);
+                const isEdited = userEdits[r.material] !== undefined;
+                const matId = CSS.escape(r.material);
+                return `<span id="val_${matId}" class="order-value-cell${isEdited ? ' edited' : ''}">$${effectiveVal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
+            }
+            if (key === "avg_monthly_sales") return r[key].toFixed(1);
+            if (key === "suggested_qty") {
+                const effectiveQty = getEffectiveQty(r);
+                const isEdited = userEdits[r.material] !== undefined;
+                const matEsc = r.material.replace(/'/g, "\\'");
+                return `<input type="number" class="order-input${isEdited ? ' edited' : ''}${effectiveQty === 0 ? ' zero' : ''}" value="${effectiveQty}" min="0" onchange="onOrderQtyChange('${matEsc}', this)" onkeyup="if(event.key==='Enter')this.blur()">` +
+                       (isEdited ? `<span class="edit-indicator">*</span>` : '');
+            }
+            if (key === "forecast_method") return `<span style="font-size:0.7rem;color:var(--muted)">${r[key]}</span>`;
+            const val = r[key];
+            return val !== undefined && val !== null ? val : "";
+        }
+
+        // ─── Export CSV ───
         function exportCSV() {
             if (!currentData) return;
-            // Build export columns
             const headers = [];
             baseCols.forEach(c => headers.push(c.label));
             for (let i = 11; i >= 0; i--) headers.push("Vta M" + String(i+1).padStart(2,'0'));
@@ -706,13 +1119,12 @@
                     headers.push(c.label);
                 }
             });
-
             const rows = currentData.results.map(r => {
                 const row = [];
                 baseCols.forEach(c => {
                     let v = r[c.key];
                     if (typeof v === "string" && v.includes(",")) v = `"${v}"`;
-                    row.push(v);
+                    row.push(v !== undefined && v !== null ? v : "");
                 });
                 const allSales = r.monthly_sales_all || r.monthly_sales || [];
                 for (let i = 11; i >= 0; i--) row.push(Math.round(allSales[i] || 0));
@@ -726,12 +1138,11 @@
                     } else {
                         let v = r[c.key];
                         if (typeof v === "string" && v.includes(",")) v = `"${v}"`;
-                        row.push(v);
+                        row.push(v !== undefined && v !== null ? v : "");
                     }
                 });
                 return row;
             });
-
             let csv = "\uFEFF" + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
             const url = URL.createObjectURL(blob);
@@ -740,6 +1151,92 @@
             a.download = "recomendaciones_pedido.csv";
             a.click();
             URL.revokeObjectURL(url);
+            showToast("CSV exportado exitosamente", "success");
+        }
+
+        // ─── Export XLSX ───
+        function exportXLSX() {
+            if (!currentData || typeof XLSX === "undefined") {
+                showToast("Error: librer\u00eda de Excel no disponible", "error");
+                return;
+            }
+            const headers = [];
+            baseCols.forEach(c => headers.push(c.label));
+            for (let i = 11; i >= 0; i--) headers.push(getMonthLabel(i));
+            afterMonthCols.forEach(c => {
+                if (c.key === "suggested_qty") {
+                    headers.push("Cant. Sugerida");
+                    headers.push("Cant. Pedido Final");
+                    headers.push("Editado");
+                } else {
+                    headers.push(c.label);
+                }
+            });
+
+            const wsData = [headers];
+            currentData.results.forEach(r => {
+                const row = [];
+                baseCols.forEach(c => row.push(r[c.key] !== undefined ? r[c.key] : ""));
+                const allSales = r.monthly_sales_all || r.monthly_sales || [];
+                for (let i = 11; i >= 0; i--) row.push(Math.round(allSales[i] || 0));
+                afterMonthCols.forEach(c => {
+                    if (c.key === "suggested_qty") {
+                        row.push(r.suggested_qty);
+                        row.push(getEffectiveQty(r));
+                        row.push(userEdits[r.material] !== undefined ? "Si" : "No");
+                    } else if (c.key === "order_value_fob") {
+                        row.push(getEffectiveValue(r));
+                    } else {
+                        row.push(r[c.key] !== undefined ? r[c.key] : "");
+                    }
+                });
+                wsData.push(row);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Auto-width columns
+            const colWidths = headers.map((h, i) => {
+                let maxLen = h.length;
+                wsData.slice(1).forEach(row => {
+                    const val = row[i] !== undefined ? String(row[i]) : "";
+                    maxLen = Math.max(maxLen, val.length);
+                });
+                return { wch: Math.min(maxLen + 2, 40) };
+            });
+            ws["!cols"] = colWidths;
+
+            XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+
+            // Summary sheet
+            const summaryData = [
+                ["Resumen de Pedido"],
+                [],
+                ["Total SKUs", currentData.summary.total_items],
+                ["Art\u00edculos a Pedir", currentData.summary.items_to_order],
+                ["Unidades Totales", currentData.summary.total_units],
+                ["Valor Total FOB", currentData.summary.total_order_value_fob],
+                ["Items Cr\u00edticos", currentData.summary.critical_items],
+                ["Items Stock Bajo", currentData.summary.low_items],
+                ["Sin Ventas", currentData.summary.no_sales_items],
+                [],
+                ["Clasificaci\u00f3n ABC-XYZ"],
+            ];
+            Object.entries(currentData.summary.abc_xyz_counts).sort().forEach(([k,v]) => {
+                summaryData.push([k, v]);
+            });
+            summaryData.push([]);
+            summaryData.push(["Patrones de Demanda"]);
+            Object.entries(currentData.summary.demand_pattern_counts).forEach(([k,v]) => {
+                summaryData.push([k, v]);
+            });
+
+            const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
+
+            XLSX.writeFile(wb, "recomendaciones_pedido.xlsx");
+            showToast("Excel exportado exitosamente", "success");
         }
     </script>
 </body>

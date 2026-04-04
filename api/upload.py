@@ -2,7 +2,6 @@ import os
 import json
 import tempfile
 from http.server import BaseHTTPRequestHandler
-import cgi
 import io
 import pandas as pd
 import numpy as np
@@ -13,9 +12,73 @@ SERVICE_LEVEL_Z = {
     85: 1.04, 90: 1.28, 92: 1.41, 95: 1.65, 97: 1.88, 98: 2.05, 99: 2.33,
 }
 
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+
+
+def parse_multipart(content_type, body):
+    """Parse multipart/form-data without deprecated cgi module."""
+    boundary = None
+    for part in content_type.split(";"):
+        part = part.strip()
+        if part.startswith("boundary="):
+            boundary = part[len("boundary="):]
+            break
+    if not boundary:
+        raise ValueError("No boundary found in Content-Type")
+
+    boundary_bytes = boundary.encode("utf-8")
+    delimiter = b"--" + boundary_bytes
+    parts = body.split(delimiter)
+
+    fields = {}
+    file_data = None
+    file_name = None
+
+    for part in parts:
+        if part in (b"", b"--\r\n", b"--"):
+            continue
+        part = part.strip(b"\r\n")
+        if not part or part == b"--":
+            continue
+
+        header_end = part.find(b"\r\n\r\n")
+        if header_end == -1:
+            continue
+
+        header_section = part[:header_end].decode("utf-8", errors="replace")
+        body_section = part[header_end + 4:]
+        if body_section.endswith(b"\r\n"):
+            body_section = body_section[:-2]
+
+        name = None
+        filename = None
+        for line in header_section.split("\r\n"):
+            if "Content-Disposition" in line:
+                for param in line.split(";"):
+                    param = param.strip()
+                    if param.startswith("name="):
+                        name = param.split("=", 1)[1].strip('"')
+                    elif param.startswith("filename="):
+                        filename = param.split("=", 1)[1].strip('"')
+
+        if name and filename:
+            file_data = body_section
+            file_name = filename
+        elif name:
+            fields[name] = body_section.decode("utf-8", errors="replace")
+
+    return fields, file_data, file_name
+
 
 def parse_excel(file_path):
-    df = pd.read_excel(file_path, sheet_name=0, header=None)
+    try:
+        df = pd.read_excel(file_path, sheet_name=0, header=None)
+    except Exception as e:
+        raise ValueError(f"Error al leer el archivo Excel: {str(e)}")
+
+    if len(df) == 0:
+        raise ValueError("El archivo Excel está vacío")
+
     header_row = None
     for i in range(min(10, len(df))):
         row_vals = df.iloc[i].astype(str).str.strip().tolist()
@@ -23,13 +86,19 @@ def parse_excel(file_path):
             header_row = i
             break
     if header_row is None:
-        raise ValueError("No se encontr\u00f3 la fila de encabezado con columna 'Material'")
+        raise ValueError(
+            "No se encontró la fila de encabezado con columna 'Material'. "
+            "Asegúrese de que su archivo tenga una columna llamada 'Material' en las primeras 10 filas."
+        )
 
     headers = df.iloc[header_row].astype(str).str.strip().tolist()
     data = df.iloc[header_row + 1:].copy()
     data.columns = headers
     data = data[data["Material"].notna() & (data["Material"].astype(str).str.strip() != "")]
     data = data[data["Material"].astype(str).str.lower() != "nan"]
+
+    if len(data) == 0:
+        raise ValueError("No se encontraron datos después de la fila de encabezado")
 
     numeric_cols = [
         "Cant.", "Stock CEDI", "K001 / Q001", "Stock Tiendas", "Stock Total",
@@ -57,7 +126,7 @@ def classify_demand(monthly_sales):
     if adi < 1.32 and cv2 < 0.49:
         return "Suave", round(adi, 2), round(cv2, 2)
     elif adi < 1.32 and cv2 >= 0.49:
-        return "Err\u00e1tica", round(adi, 2), round(cv2, 2)
+        return "Errática", round(adi, 2), round(cv2, 2)
     elif adi >= 1.32 and cv2 < 0.49:
         return "Intermitente", round(adi, 2), round(cv2, 2)
     else:
@@ -171,7 +240,7 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
                 avg_monthly_sales = sum(recent_sales) / len(non_zero_recent)
             else:
                 avg_monthly_sales = float(row.get("Vta Prom Mensual", 0))
-            forecast_method = "Promedio M\u00f3vil"
+            forecast_method = "Promedio Móvil"
 
         active_months = len(non_zero_recent)
         total_months_analyzed = len(recent_sales)
@@ -201,7 +270,7 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
         if avg_monthly_sales == 0:
             status = "Sin Ventas"
         elif stock_total <= rop * 0.5:
-            status = "Cr\u00edtico"
+            status = "Crítico"
         elif stock_total <= rop:
             status = "Bajo"
         elif suggested_qty > 0:
@@ -264,48 +333,46 @@ class handler(BaseHTTPRequestHandler):
             self._json_response(400, {"error": "Se requiere multipart/form-data"})
             return
 
-        # Parse multipart form data
-        environ = {
-            "REQUEST_METHOD": "POST",
-            "CONTENT_TYPE": content_type,
-            "CONTENT_LENGTH": self.headers.get("Content-Length", "0"),
-        }
-        form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ=environ)
-
-        if "file" not in form:
-            self._json_response(400, {"error": "No se subi\u00f3 ning\u00fan archivo"})
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length > MAX_FILE_SIZE:
+            self._json_response(400, {"error": f"El archivo excede el límite de {MAX_FILE_SIZE // (1024*1024)}MB"})
             return
 
-        file_item = form["file"]
-        if not file_item.filename or not file_item.filename.endswith((".xlsx", ".xls")):
+        try:
+            body = self.rfile.read(content_length)
+            fields, file_data, file_name = parse_multipart(content_type, body)
+        except Exception as e:
+            self._json_response(400, {"error": f"Error al procesar los datos del formulario: {str(e)}"})
+            return
+
+        if file_data is None:
+            self._json_response(400, {"error": "No se subió ningún archivo"})
+            return
+
+        if not file_name or not file_name.endswith((".xlsx", ".xls")):
             self._json_response(400, {"error": "Por favor suba un archivo Excel (.xlsx o .xls)"})
             return
 
         try:
             with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
-                tmp.write(file_item.file.read())
+                tmp.write(file_data)
                 tmp_path = tmp.name
 
             data = parse_excel(tmp_path)
             os.unlink(tmp_path)
 
-            def get_field(name, default=""):
-                if name in form:
-                    return form[name].value
-                return default
-
-            excluded_str = get_field("excluded_months", "")
+            excluded_str = fields.get("excluded_months", "")
             excluded_months = []
             if excluded_str:
                 excluded_months = [int(x) for x in excluded_str.split(",") if x.strip().isdigit()]
 
             params = {
-                "lead_time_months": float(get_field("lead_time_months", "3")),
-                "target_stock_months": float(get_field("target_stock_months", "3")),
-                "service_level": int(get_field("service_level", "95")),
-                "min_order_qty": int(get_field("min_order_qty", "1")),
-                "rounding": int(get_field("rounding", "1")),
-                "sales_months_to_use": int(get_field("sales_months_to_use", "3")),
+                "lead_time_months": float(fields.get("lead_time_months", "3")),
+                "target_stock_months": float(fields.get("target_stock_months", "3")),
+                "service_level": int(fields.get("service_level", "95")),
+                "min_order_qty": int(fields.get("min_order_qty", "1")),
+                "rounding": int(fields.get("rounding", "1")),
+                "sales_months_to_use": int(fields.get("sales_months_to_use", "3")),
                 "excluded_months": excluded_months,
             }
 
@@ -329,7 +396,7 @@ class handler(BaseHTTPRequestHandler):
                     "items_to_order": items_to_order,
                     "total_order_value_fob": round(total_order_value, 2),
                     "total_units": total_units,
-                    "critical_items": sum(1 for r in results if r["status"] == "Cr\u00edtico"),
+                    "critical_items": sum(1 for r in results if r["status"] == "Crítico"),
                     "low_items": sum(1 for r in results if r["status"] == "Bajo"),
                     "no_sales_items": sum(1 for r in results if r["status"] == "Sin Ventas"),
                     "abc_xyz_counts": abc_counts,
@@ -338,8 +405,10 @@ class handler(BaseHTTPRequestHandler):
                 "params": params,
             })
 
+        except ValueError as e:
+            self._json_response(400, {"error": str(e)})
         except Exception as e:
-            self._json_response(500, {"error": str(e)})
+            self._json_response(500, {"error": f"Error interno del servidor: {str(e)}"})
 
     def _json_response(self, status_code, data):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")

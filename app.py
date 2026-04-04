@@ -22,7 +22,13 @@ SERVICE_LEVEL_Z = {
 
 
 def parse_excel(file_path):
-    df = pd.read_excel(file_path, sheet_name=0, header=None)
+    try:
+        df = pd.read_excel(file_path, sheet_name=0, header=None)
+    except Exception as e:
+        raise ValueError(f"Error al leer el archivo Excel: {str(e)}")
+
+    if len(df) == 0:
+        raise ValueError("El archivo Excel está vacío")
 
     header_row = None
     for i in range(min(10, len(df))):
@@ -32,7 +38,10 @@ def parse_excel(file_path):
             break
 
     if header_row is None:
-        raise ValueError("No se encontr\u00f3 la fila de encabezado con columna 'Material'")
+        raise ValueError(
+            "No se encontró la fila de encabezado con columna 'Material'. "
+            "Asegúrese de que su archivo tenga una columna llamada 'Material' en las primeras 10 filas."
+        )
 
     headers = df.iloc[header_row].astype(str).str.strip().tolist()
     data = df.iloc[header_row + 1:].copy()
@@ -40,6 +49,9 @@ def parse_excel(file_path):
 
     data = data[data["Material"].notna() & (data["Material"].astype(str).str.strip() != "")]
     data = data[data["Material"].astype(str).str.lower() != "nan"]
+
+    if len(data) == 0:
+        raise ValueError("No se encontraron datos después de la fila de encabezado")
 
     numeric_cols = [
         "Cant.", "Stock CEDI", "K001 / Q001", "Stock Tiendas", "Stock Total",
@@ -413,8 +425,10 @@ def upload():
             "params": params,
         })
 
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
