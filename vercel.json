@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/upload.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     },
     {
       "src": "public/**",
@@ -13,11 +16,5 @@
   "routes": [
     { "src": "/api/upload", "dest": "/api/upload.py" },
     { "src": "/(.*)", "dest": "/public/$1" }
-  ],
-  "functions": {
-    "api/upload.py": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  }
+  ]
 }
