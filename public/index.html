@@ -150,6 +150,24 @@
         .highlight-row { background: rgba(220,38,38,0.04) !important; }
         [data-theme="dark"] .highlight-row { background: rgba(220,38,38,0.08) !important; }
 
+        /* Row marking / pinning */
+        .marked-row { background: rgba(139,92,246,0.08) !important; }
+        .marked-row td { border-bottom-color: rgba(139,92,246,0.2) !important; }
+        [data-theme="dark"] .marked-row { background: rgba(139,92,246,0.15) !important; }
+        [data-theme="dark"] .marked-row td { border-bottom-color: rgba(139,92,246,0.3) !important; }
+        .marked-row.highlight-row { background: rgba(139,92,246,0.12) !important; }
+        [data-theme="dark"] .marked-row.highlight-row { background: rgba(139,92,246,0.2) !important; }
+        .mark-btn {
+            width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
+            background: transparent; cursor: pointer; transition: all 0.15s; display: inline-flex;
+            align-items: center; justify-content: center; font-size: 0.65rem; color: transparent;
+            padding: 0; line-height: 1;
+        }
+        .mark-btn:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.1); }
+        .mark-btn.marked { border-color: #8b5cf6; background: #8b5cf6; color: white; }
+        thead th.mark-col { min-width: 32px; width: 32px; text-align: center; cursor: default; padding: 0.5rem 0.3rem; }
+        thead th.mark-col:hover { background: var(--hover-bg); }
+
         .month-val { font-size: 0.75rem; color: var(--text); text-align: right; }
         .month-val.zero { color: #cbd5e1; }
         [data-theme="dark"] .month-val.zero { color: #475569; }
@@ -425,10 +443,13 @@
                             <option value="needs_order">Necesita Pedido</option>
                             <option value="no_order">No Necesita</option>
                             <option value="edited">Editados</option>
+                            <option value="marked">Marcados</option>
                         </select>
                         <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;color:var(--text-light)">
                             <input type="checkbox" id="groupBySupplier" onchange="filterTable()"> Agrupar por Proveedor
                         </label>
+                        <span id="markCount" style="font-size:0.8rem;color:#8b5cf6;font-weight:600;"></span>
+                        <button class="btn btn-sm btn-secondary" id="clearMarksBtn" onclick="clearMarks()" style="display:none">Limpiar Marcas</button>
                     </div>
                     <div style="display:flex;align-items:center;gap:0.5rem;">
                         <div class="col-toggle-wrapper">
@@ -469,6 +490,7 @@
         let filteredItems = [];
         let hiddenCols = new Set();
         let filterTimeout = null;
+        let markedRows = new Set();
 
         const MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
         const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -756,6 +778,32 @@
             updateSummaryTotals();
         }
 
+        // ─── Row Marking ───
+        function toggleMark(material) {
+            if (markedRows.has(material)) markedRows.delete(material);
+            else markedRows.add(material);
+            // Update button in-place without re-rendering
+            const btn = document.getElementById("mark_" + CSS.escape(material));
+            if (btn) {
+                btn.classList.toggle("marked", markedRows.has(material));
+                btn.innerHTML = markedRows.has(material) ? "&#10003;" : "";
+            }
+            // Update row class
+            const row = btn ? btn.closest("tr") : null;
+            if (row) row.classList.toggle("marked-row", markedRows.has(material));
+            // Update mark count
+            updateMarkCount();
+        }
+        function clearMarks() {
+            markedRows.clear();
+            updateMarkCount();
+            renderCurrentPage();
+        }
+        function updateMarkCount() {
+            const el = document.getElementById("markCount");
+            if (el) el.textContent = markedRows.size > 0 ? `(${markedRows.size} marcados)` : "";
+        }
+
         // ─── Render Results ───
         function renderResults(data) {
             document.getElementById("results").style.display = "block";
@@ -963,6 +1011,12 @@
             if (orderF === "needs_order") items = items.filter(r => getEffectiveQty(r) > 0);
             if (orderF === "no_order") items = items.filter(r => getEffectiveQty(r) === 0);
             if (orderF === "edited") items = items.filter(r => userEdits[r.material] !== undefined);
+            if (orderF === "marked") items = items.filter(r => markedRows.has(r.material));
+
+            // Show/hide clear marks button
+            const clearBtn = document.getElementById("clearMarksBtn");
+            if (clearBtn) clearBtn.style.display = markedRows.size > 0 ? "inline-flex" : "none";
+            updateMarkCount();
 
             if (sortCol) {
                 const so = { "Cr\u00edtico": 4, "Bajo": 3, "Reponer": 2, "OK": 1, "Sin Ventas": 0 };
@@ -998,6 +1052,7 @@
             const showMonths = !hiddenCols.has("_months");
 
             let headerHtml = "<tr>";
+            headerHtml += `<th class="mark-col" title="Marcar filas para resaltar">&marker;</th>`;
             visibleBase.forEach(c => {
                 const cls = (c.align === "right" ? " text-right" : c.align === "center" ? " text-center" : "");
                 const sortCls = sortCol === c.key ? (sortDir === "asc" ? " sorted-asc" : " sorted-desc") : "";
@@ -1017,7 +1072,7 @@
             headerHtml += "</tr>";
             thead.innerHTML = headerHtml;
 
-            const totalVisibleCols = visibleBase.length + (showMonths ? 12 : 0) + visibleAfter.length;
+            const totalVisibleCols = 1 + visibleBase.length + (showMonths ? 12 : 0) + visibleAfter.length;
 
             const tbody = document.getElementById("tableBody");
             let html = "";
@@ -1044,8 +1099,16 @@
         }
 
         function buildRow(r, visibleBase, visibleAfter, showMonths) {
-            const rowCls = r.status === "Cr\u00edtico" ? " class='highlight-row'" : "";
+            const isMarked = markedRows.has(r.material);
+            const isCritical = r.status === "Cr\u00edtico";
+            let classes = [];
+            if (isCritical) classes.push("highlight-row");
+            if (isMarked) classes.push("marked-row");
+            const rowCls = classes.length ? ` class='${classes.join(" ")}'` : "";
+            const matEscId = CSS.escape(r.material);
+            const matEscClick = r.material.replace(/'/g, "\\'");
             let html = `<tr${rowCls}>`;
+            html += `<td class="text-center"><button class="mark-btn${isMarked ? ' marked' : ''}" id="mark_${matEscId}" onclick="event.stopPropagation();toggleMark('${matEscClick}')" title="${isMarked ? 'Desmarcar' : 'Marcar'}">${isMarked ? '&#10003;' : ''}</button></td>`;
             visibleBase.forEach(c => {
                 const cls = c.align === "right" ? " class='text-right'" : c.align === "center" ? " class='text-center'" : "";
                 html += `<td${cls}>${renderCell(c.key, r)}</td>`;
