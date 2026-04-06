@@ -157,6 +157,11 @@
         [data-theme="dark"] .marked-row td { border-bottom-color: rgba(139,92,246,0.3) !important; }
         .marked-row.highlight-row { background: rgba(139,92,246,0.12) !important; }
         [data-theme="dark"] .marked-row.highlight-row { background: rgba(139,92,246,0.2) !important; }
+        .badge-lt-not-met { background: #fef2f2; color: #dc2626; font-size: 0.62rem; }
+        [data-theme="dark"] .badge-lt-not-met { background: rgba(220,38,38,0.15); }
+        .badge-lt-met { background: #f0fdf4; color: #16a34a; font-size: 0.62rem; }
+        [data-theme="dark"] .badge-lt-met { background: rgba(22,163,74,0.15); }
+
         .mark-btn {
             width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
             background: transparent; cursor: pointer; transition: all 0.15s; display: inline-flex;
@@ -387,6 +392,8 @@
                 <strong>Intermitente/Irregular</strong> &rarr; Croston SBA &nbsp;|&nbsp;
                 <strong>Stock Seg.</strong> = Z &times; &sigma; &times; &radic;LT &nbsp;|&nbsp;
                 <strong>Clasif.</strong>: ABC (valor) + XYZ (variabilidad) + Patr&oacute;n ADI/CV&sup2; &nbsp;|&nbsp;
+                <strong>LT OK</strong>: Pedido = Demanda&times;(LT+Obj) + SS - Stock &nbsp;|&nbsp;
+                <strong>LT NO</strong>: Stock &lt; demanda LT &rarr; Pedido = Demanda&times;Obj + SS (sin deducir stock) &nbsp;|&nbsp;
                 <strong>Edite</strong> la columna "Cant. Pedido" para ajustar manualmente
             </div>
         </div>
@@ -885,6 +892,7 @@
             { key: "months_of_stock", label: "Meses Stock", align: "right", group: "C\u00e1lculo" },
             { key: "safety_stock_units", label: "Stock Seg.", align: "right", group: "C\u00e1lculo" },
             { key: "rop", label: "ROP", align: "right", group: "C\u00e1lculo" },
+            { key: "lead_time_met", label: "LT", align: "center", group: "C\u00e1lculo" },
             { key: "suggested_qty", label: "Cant. Pedido", align: "right", group: "Pedido" },
             { key: "fob", label: "FOB $", align: "right", group: "Pedido" },
             { key: "order_value_fob", label: "Valor $", align: "right", group: "Pedido" },
@@ -1162,6 +1170,12 @@
             if (key === "demand_pattern") {
                 const dpCls = { "Suave": "suave", "Err\u00e1tica": "erratica", "Intermitente": "intermitente", "Irregular": "irregular" }[r.demand_pattern] || "";
                 return `<span class="badge badge-demand ${dpCls}">${r.demand_pattern}</span>`;
+            }
+            if (key === "lead_time_met") {
+                if (r.avg_monthly_sales === 0) return `<span style="color:var(--muted)">-</span>`;
+                return r.lead_time_met
+                    ? `<span class="badge badge-lt-met" title="Stock cubre lead time">OK</span>`
+                    : `<span class="badge badge-lt-not-met" title="Stock NO cubre lead time - pedido sin deducci\u00f3n">NO</span>`;
             }
             if (key === "fob") return "$" + r.fob.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
             if (key === "order_value_fob") {

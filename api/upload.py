@@ -255,8 +255,17 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
             safety_stock_units = 0
 
         rop = (avg_monthly_sales * lead_time_months) + safety_stock_units
-        demand_coverage = avg_monthly_sales * (lead_time_months + target_stock_months)
-        suggested_qty = max(0, demand_coverage + safety_stock_units - stock_total)
+        lead_time_demand = avg_monthly_sales * lead_time_months
+        lead_time_met = stock_total >= lead_time_demand or avg_monthly_sales == 0
+
+        if lead_time_met:
+            # Normal: stock covers lead time, order for target coverage
+            demand_coverage = avg_monthly_sales * (lead_time_months + target_stock_months)
+            suggested_qty = max(0, demand_coverage + safety_stock_units - stock_total)
+        else:
+            # Stock doesn't cover lead time: order full target + safety, don't deduct stock
+            demand_coverage = avg_monthly_sales * target_stock_months
+            suggested_qty = max(0, demand_coverage + safety_stock_units)
 
         if 0 < suggested_qty < min_order_qty:
             suggested_qty = min_order_qty
@@ -321,6 +330,7 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
             "safety_stock_units": round(safety_stock_units, 1),
             "rop": round(rop, 1),
             "demand_coverage": round(demand_coverage, 1),
+            "lead_time_met": lead_time_met,
             "suggested_qty": int(suggested_qty),
             "order_value_fob": round(suggested_qty * fob, 2),
             "status": status,
