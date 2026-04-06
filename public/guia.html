@@ -103,15 +103,16 @@
             <li><a href="#exclusion">Exclusi&oacute;n de Meses</a></li>
             <li><a href="#presets">Presets (Configuraciones Guardadas)</a></li>
             <li><a href="#resultados">Interpretaci&oacute;n de Resultados</a></li>
-            <li><a href="#formula">F&oacute;rmulas de C&aacute;lculo</a></li>
-            <li><a href="#leadtime">Regla de Lead Time</a></li>
-            <li><a href="#clasificacion">Clasificaciones ABC-XYZ y Patrones de Demanda</a></li>
+            <li><a href="#formula">C&aacute;lculos Detallados con Ejemplos</a> (Pron&oacute;stico, Stock Seguridad, ROP, Cantidad, ABC-XYZ)</li>
+            <li><a href="#clasificacion">Resumen de Clasificaciones</a></li>
             <li><a href="#columnas">Referencia de Columnas</a></li>
             <li><a href="#edicion">Edici&oacute;n Manual de Cantidades</a></li>
             <li><a href="#marcado">Marcado de Filas</a></li>
             <li><a href="#filtros">Filtros y B&uacute;squeda</a></li>
             <li><a href="#exportar">Exportaci&oacute;n de Datos</a></li>
             <li><a href="#tips">Consejos y Mejores Pr&aacute;cticas</a></li>
+        </ol>
+        <p style="font-size:0.82rem; color:var(--text-light); margin-top:0.5rem;">La secci&oacute;n 7 contiene todos los c&aacute;lculos detallados paso a paso con ejemplos num&eacute;ricos.</p>
         </ol>
     </div>
 
@@ -268,82 +269,520 @@
     </table>
 
 
-    <!-- 7. FÓRMULAS -->
-    <h2 id="formula">7. F&oacute;rmulas de C&aacute;lculo</h2>
+    <!-- 7. CÁLCULOS DETALLADOS -->
+    <h2 id="formula">7. C&aacute;lculos Detallados con Ejemplos</h2>
 
-    <h3>Pron&oacute;stico de Demanda</h3>
-    <p>El sistema selecciona autom&aacute;ticamente el m&eacute;todo de pron&oacute;stico seg&uacute;n el patr&oacute;n de demanda del art&iacute;culo:</p>
+    <p>Esta secci&oacute;n explica paso a paso cada c&aacute;lculo que realiza el sistema, con ejemplos num&eacute;ricos concretos.</p>
+
+    <!-- 7.1 CLASIFICACIÓN DE DEMANDA -->
+    <h3>7.1 Clasificaci&oacute;n de Demanda (Syntetos-Boylan)</h3>
+    <p>Antes de pronosticar, el sistema clasifica el patr&oacute;n de demanda de cada art&iacute;culo usando dos m&eacute;tricas calculadas sobre los 12 meses (excluyendo meses descartados):</p>
+
+    <div class="formula">
+        <span class="label">ADI (Average Demand Interval) &mdash; Frecuencia de demanda</span>
+        ADI = N&uacute;mero total de per&iacute;odos &divide; N&uacute;mero de per&iacute;odos con demanda &gt; 0
+    </div>
+    <div class="formula">
+        <span class="label">CV&sup2; (Coeficiente de Variaci&oacute;n al cuadrado) &mdash; Variabilidad de tama&ntilde;o</span>
+        CV&sup2; = (Desviaci&oacute;n Est&aacute;ndar de demandas no-cero &divide; Promedio de demandas no-cero)&sup2;
+    </div>
+
     <table>
-        <tr><th>Patr&oacute;n</th><th>M&eacute;todo</th><th>L&oacute;gica</th></tr>
-        <tr><td>Suave / Err&aacute;tica</td><td>Promedio M&oacute;vil</td><td>Suma de ventas recientes &divide; meses con venta</td></tr>
-        <tr><td>Intermitente / Irregular</td><td>Croston SBA</td><td>Usa los 12 meses completos con correcci&oacute;n de sesgo</td></tr>
-        <tr><td>Sin Demanda</td><td>N/A</td><td>Sin pron&oacute;stico (cantidad sugerida = 0)</td></tr>
+        <tr><th>Patr&oacute;n</th><th>Condici&oacute;n</th><th>M&eacute;todo de Pron&oacute;stico</th></tr>
+        <tr><td><span class="badge b-green">Suave</span></td><td>ADI &lt; 1.32 y CV&sup2; &lt; 0.49</td><td>Promedio M&oacute;vil</td></tr>
+        <tr><td><span class="badge b-yellow">Err&aacute;tica</span></td><td>ADI &lt; 1.32 y CV&sup2; &ge; 0.49</td><td>Promedio M&oacute;vil</td></tr>
+        <tr><td><span class="badge b-blue">Intermitente</span></td><td>ADI &ge; 1.32 y CV&sup2; &lt; 0.49</td><td>Croston SBA</td></tr>
+        <tr><td><span class="badge b-red">Irregular</span></td><td>ADI &ge; 1.32 y CV&sup2; &ge; 0.49</td><td>Croston SBA</td></tr>
     </table>
 
-    <h3>Stock de Seguridad</h3>
+    <div class="card">
+        <div class="card-title">Ejemplo: Clasificaci&oacute;n de Demanda</div>
+        <p><strong>Art&iacute;culo A</strong> &mdash; Ventas mensuales (12 meses, reciente a antiguo):</p>
+        <p style="font-family:monospace; background:var(--bg); padding:0.5rem; border-radius:6px;">120, 95, 110, 105, 130, 98, 115, 100, 125, 90, 108, 102</p>
+        <p>Todos los meses tienen venta &gt; 0, as&iacute; que:</p>
+        <ul>
+            <li>ADI = 12 &divide; 12 = <strong>1.00</strong> (demanda frecuente)</li>
+            <li>Promedio no-cero = 108.2, Desv. Est. = 12.4</li>
+            <li>CV&sup2; = (12.4 &divide; 108.2)&sup2; = <strong>0.013</strong> (muy consistente)</li>
+        </ul>
+        <p>ADI &lt; 1.32 y CV&sup2; &lt; 0.49 &rarr; <span class="badge b-green">Suave</span> &rarr; se usa <strong>Promedio M&oacute;vil</strong></p>
+
+        <p style="margin-top:1rem;"><strong>Art&iacute;culo B</strong> &mdash; Ventas mensuales:</p>
+        <p style="font-family:monospace; background:var(--bg); padding:0.5rem; border-radius:6px;">0, 45, 0, 0, 38, 0, 0, 52, 0, 0, 0, 41</p>
+        <p>Solo 4 de 12 meses tienen venta:</p>
+        <ul>
+            <li>ADI = 12 &divide; 4 = <strong>3.00</strong> (demanda espor&aacute;dica)</li>
+            <li>Promedio no-cero = 44.0, Desv. Est. = 6.2</li>
+            <li>CV&sup2; = (6.2 &divide; 44.0)&sup2; = <strong>0.020</strong> (tama&ntilde;o consistente)</li>
+        </ul>
+        <p>ADI &ge; 1.32 y CV&sup2; &lt; 0.49 &rarr; <span class="badge b-blue">Intermitente</span> &rarr; se usa <strong>Croston SBA</strong></p>
+    </div>
+
+    <!-- 7.2 PRONÓSTICO: PROMEDIO MÓVIL -->
+    <h3>7.2 Pron&oacute;stico: Promedio M&oacute;vil</h3>
+    <p>Se usa para patrones <span class="badge b-green">Suave</span> y <span class="badge b-yellow">Err&aacute;tica</span>. Utiliza solo los meses recientes configurados en "Historial de Ventas".</p>
+
+    <div class="formula">
+        <span class="label">Promedio M&oacute;vil</span>
+        Pron&oacute;stico = Suma de ventas en per&iacute;odo reciente &divide; N&uacute;mero de meses con venta &gt; 0
+    </div>
+
+    <div class="tip">
+        <strong>Nota:</strong> Se divide por meses <em>con venta</em>, no por el total de meses. Esto evita que meses con 0 ventas (por quiebre de stock, por ejemplo) diluyan el promedio.
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Promedio M&oacute;vil (3 meses recientes)</div>
+        <p>Ventas recientes: <strong>120, 0, 95</strong></p>
+        <ul>
+            <li>Suma = 120 + 0 + 95 = 215</li>
+            <li>Meses con venta = 2 (se excluye el mes con 0)</li>
+            <li>Pron&oacute;stico = 215 &divide; 2 = <strong>107.5 unidades/mes</strong></li>
+        </ul>
+        <p>Si se usaran 6 meses con ventas <strong>120, 0, 95, 110, 105, 130</strong>:</p>
+        <ul>
+            <li>Suma = 560, Meses con venta = 5</li>
+            <li>Pron&oacute;stico = 560 &divide; 5 = <strong>112.0 unidades/mes</strong></li>
+        </ul>
+    </div>
+
+    <!-- 7.3 PRONÓSTICO: CROSTON SBA -->
+    <h3>7.3 Pron&oacute;stico: Croston SBA</h3>
+    <p>Se usa para patrones <span class="badge b-blue">Intermitente</span> e <span class="badge b-red">Irregular</span>. El m&eacute;todo Croston separa el pron&oacute;stico en dos componentes que se actualizan con suavizamiento exponencial (&alpha; = 0.15):</p>
+
+    <div class="formula">
+        <span class="label">Componentes de Croston</span>
+        z&#770; = Tama&ntilde;o estimado de demanda (cuando ocurre)
+        p&#770; = Intervalo estimado entre demandas (en per&iacute;odos)
+    </div>
+
+    <p>Cada vez que ocurre una demanda, ambos se actualizan:</p>
+    <div class="formula">
+        <span class="label">Actualizaci&oacute;n por suavizamiento exponencial</span>
+        z&#770; = &alpha; &times; demanda_actual + (1 &minus; &alpha;) &times; z&#770;_anterior
+        p&#770; = &alpha; &times; per&iacute;odos_desde_&uacute;ltima + (1 &minus; &alpha;) &times; p&#770;_anterior
+    </div>
+
+    <p>El pron&oacute;stico final aplica la correcci&oacute;n de sesgo SBA (Syntetos-Boylan Approximation):</p>
+    <div class="formula">
+        <span class="label">Pron&oacute;stico Croston SBA</span>
+        Pron&oacute;stico = (z&#770; &divide; p&#770;) &times; (1 &minus; &alpha;/2)
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Croston SBA</div>
+        <p>Ventas mensuales (12 meses): <strong>0, 45, 0, 0, 38, 0, 0, 52, 0, 0, 0, 41</strong></p>
+        <p>El algoritmo procesa cada mes secuencialmente. Despu&eacute;s de recorrer los 12 meses:</p>
+        <ul>
+            <li>z&#770; final &asymp; 43.8 (estimado de tama&ntilde;o de demanda)</li>
+            <li>p&#770; final &asymp; 2.7 (estimado de intervalo entre demandas)</li>
+            <li>Pron&oacute;stico = (43.8 &divide; 2.7) &times; (1 &minus; 0.15/2)</li>
+            <li>Pron&oacute;stico = 16.2 &times; 0.925 = <strong>15.0 unidades/mes</strong></li>
+        </ul>
+        <p>Comparaci&oacute;n: un promedio simple dar&iacute;a 176 &divide; 12 = 14.7, pero el promedio m&oacute;vil con 3 meses solo ver&iacute;a "0, 45, 0" = 22.5. Croston usa toda la informaci&oacute;n de los 12 meses de manera m&aacute;s inteligente.</p>
+    </div>
+
+    <!-- 7.4 STOCK DE SEGURIDAD -->
+    <h3>7.4 Stock de Seguridad</h3>
+    <p>Protege contra la variabilidad de la demanda durante el tiempo de entrega. Se calcula solo cuando hay al menos 2 meses de datos y demanda promedio &gt; 0.</p>
+
     <div class="formula">
         <span class="label">Stock de Seguridad</span>
         SS = Z &times; &sigma; &times; &radic;LT
     </div>
-    <p>Donde <strong>Z</strong> es el valor Z del nivel de servicio, <strong>&sigma;</strong> es la desviaci&oacute;n est&aacute;ndar de la demanda reciente, y <strong>LT</strong> es el tiempo de entrega en meses.</p>
 
-    <h3>Punto de Reorden (ROP)</h3>
-    <div class="formula">
-        <span class="label">Punto de Reorden</span>
-        ROP = (Demanda Mensual &times; Lead Time) + Stock de Seguridad
+    <table>
+        <tr><th>Variable</th><th>Descripci&oacute;n</th></tr>
+        <tr><td><strong>Z</strong></td><td>Valor Z del nivel de servicio (de la tabla de distribu&oacute;n normal)</td></tr>
+        <tr><td><strong>&sigma;</strong></td><td>Desviaci&oacute;n est&aacute;ndar de las ventas mensuales recientes (con correcci&oacute;n de Bessel, ddof=1)</td></tr>
+        <tr><td><strong>LT</strong></td><td>Tiempo de entrega en meses</td></tr>
+    </table>
+
+    <h3>Tabla de Valores Z por Nivel de Servicio</h3>
+    <table>
+        <tr><th>Nivel de Servicio</th><th>85%</th><th>90%</th><th>92%</th><th>95%</th><th>97%</th><th>98%</th><th>99%</th></tr>
+        <tr><td><strong>Valor Z</strong></td><td>1.04</td><td>1.28</td><td>1.41</td><td>1.65</td><td>1.88</td><td>2.05</td><td>2.33</td></tr>
+    </table>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Stock de Seguridad</div>
+        <p><strong>Par&aacute;metros:</strong> Nivel de servicio = 95% (Z = 1.65), Lead Time = 3 meses</p>
+        <p><strong>Ventas recientes (3 meses):</strong> 120, 80, 100</p>
+        <ol>
+            <li>Calcular la desviaci&oacute;n est&aacute;ndar:
+                <ul>
+                    <li>Promedio = (120 + 80 + 100) &divide; 3 = 100</li>
+                    <li>Varianza = [(120&minus;100)&sup2; + (80&minus;100)&sup2; + (100&minus;100)&sup2;] &divide; (3&minus;1) = (400 + 400 + 0) &divide; 2 = 400</li>
+                    <li>&sigma; = &radic;400 = <strong>20.0</strong></li>
+                </ul>
+            </li>
+            <li>Calcular stock de seguridad:
+                <ul>
+                    <li>SS = 1.65 &times; 20.0 &times; &radic;3</li>
+                    <li>SS = 1.65 &times; 20.0 &times; 1.732</li>
+                    <li>SS = <strong>57.2 unidades</strong></li>
+                </ul>
+            </li>
+        </ol>
+        <p>Interpretaci&oacute;n: con 57 unidades de stock de seguridad, hay un 95% de probabilidad de no tener quiebre de stock durante el lead time.</p>
     </div>
 
-    <h3>Cantidad Sugerida</h3>
-    <p>La f&oacute;rmula depende de si el stock actual cubre la demanda durante el lead time (ver secci&oacute;n siguiente).</p>
+    <div class="warning">
+        <strong>Impacto del nivel de servicio:</strong> Cambiar de 95% a 99% incrementa Z de 1.65 a 2.33 &mdash; un aumento del 41% en el stock de seguridad. En el ejemplo anterior: SS pasar&iacute;a de 57.2 a 80.7 unidades.
+    </div>
 
+    <!-- 7.5 PUNTO DE REORDEN (ROP) -->
+    <h3>7.5 Punto de Reorden (ROP)</h3>
+    <p>Indica el nivel de inventario al cual se debe colocar un nuevo pedido. Cuando el stock cae por debajo del ROP, el art&iacute;culo est&aacute; en riesgo.</p>
 
-    <!-- 8. REGLA DE LEAD TIME -->
-    <h2 id="leadtime">8. Regla de Lead Time</h2>
+    <div class="formula">
+        <span class="label">Punto de Reorden</span>
+        ROP = (Pron&oacute;stico Mensual &times; Lead Time) + Stock de Seguridad
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Punto de Reorden</div>
+        <p><strong>Datos:</strong> Pron&oacute;stico = 100 un/mes, Lead Time = 3 meses, SS = 57.2 un.</p>
+        <ul>
+            <li>Demanda durante LT = 100 &times; 3 = 300</li>
+            <li>ROP = 300 + 57.2 = <strong>357.2 unidades</strong></li>
+        </ul>
+        <p>Significado: si el stock total baja de 357 unidades, el art&iacute;culo aparece como <span class="badge b-yellow">Bajo</span>. Si baja de 357 &times; 0.5 = 179, aparece como <span class="badge b-red">Cr&iacute;tico</span>.</p>
+    </div>
+
+    <h3>Estados basados en ROP</h3>
+    <table>
+        <tr><th>Estado</th><th>Condici&oacute;n</th></tr>
+        <tr><td><span class="badge b-red">Cr&iacute;tico</span></td><td>Stock Total &le; ROP &times; 0.5</td></tr>
+        <tr><td><span class="badge b-yellow">Bajo</span></td><td>Stock Total &le; ROP</td></tr>
+        <tr><td><span class="badge b-blue">Reponer</span></td><td>Stock &gt; ROP pero se necesita reposici&oacute;n para cobertura objetivo</td></tr>
+        <tr><td><span class="badge b-green">OK</span></td><td>Stock suficiente, no se necesita pedido</td></tr>
+        <tr><td><span class="badge b-gray">Sin Ventas</span></td><td>Pron&oacute;stico = 0 (sin demanda)</td></tr>
+    </table>
+
+    <!-- 7.6 MESES DE STOCK -->
+    <h3>7.6 Meses de Stock</h3>
+    <p>Indica cu&aacute;ntos meses de demanda cubre el inventario actual.</p>
+
+    <div class="formula">
+        <span class="label">Meses de Stock</span>
+        Meses de Stock = Stock Total &divide; Pron&oacute;stico Mensual
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Meses de Stock</div>
+        <p><strong>Datos:</strong> Stock Total = 250 un., Pron&oacute;stico = 100 un/mes</p>
+        <ul>
+            <li>Meses de Stock = 250 &divide; 100 = <strong>2.5 meses</strong></li>
+        </ul>
+        <p>Si el lead time es 3 meses, esto significa que el stock se agotar&aacute; antes de que llegue el pedido.</p>
+        <p>Si el pron&oacute;stico = 0, se muestra <strong>&infin;</strong> (infinito).</p>
+    </div>
+
+    <!-- 7.7 CANTIDAD SUGERIDA Y REGLA DE LEAD TIME -->
+    <h3>7.7 Cantidad Sugerida de Pedido</h3>
+    <p>El c&aacute;lculo central del sistema. Antes de aplicar la f&oacute;rmula, el sistema verifica si el stock actual cubre la demanda durante el lead time.</p>
 
     <div class="important">
-        <strong>Regla clave:</strong> El sistema verifica si el stock actual es suficiente para cubrir la demanda durante el tiempo de entrega antes de calcular la cantidad de pedido.
+        <strong>Regla clave:</strong> El sistema compara el Stock Actual contra la Demanda del Lead Time (Pron&oacute;stico &times; Lead Time) para decidir qu&eacute; f&oacute;rmula usar.
     </div>
 
     <h3>Caso 1: Stock cubre el Lead Time <span class="badge b-green">LT OK</span></h3>
-    <p>Cuando el stock actual &ge; (Demanda Mensual &times; Lead Time):</p>
+    <p>Cuando Stock Actual &ge; Pron&oacute;stico &times; Lead Time:</p>
     <div class="formula">
-        <span class="label">Lead Time cubierto &mdash; F&oacute;rmula normal</span>
-        Cantidad = (Demanda &times; (Lead Time + Stock Objetivo)) + Stock Seguridad &minus; Stock Actual
+        <span class="label">F&oacute;rmula cuando LT est&aacute; cubierto</span>
+        Cantidad = (Pron&oacute;stico &times; (Lead Time + Stock Objetivo)) + Stock Seguridad &minus; Stock Actual
     </div>
-    <p>El stock actual se descuenta porque es suficiente para aguantar mientras llega el pedido.</p>
+    <p>El stock actual se descuenta porque es suficiente para cubrir la demanda mientras llega el pedido.</p>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: LT Cubierto</div>
+        <p><strong>Datos:</strong></p>
+        <table>
+            <tr><td>Pron&oacute;stico</td><td>100 un/mes</td></tr>
+            <tr><td>Lead Time</td><td>3 meses</td></tr>
+            <tr><td>Stock Objetivo</td><td>3 meses</td></tr>
+            <tr><td>Stock de Seguridad</td><td>57.2 un.</td></tr>
+            <tr><td>Stock Actual</td><td>400 un.</td></tr>
+        </table>
+        <ol>
+            <li>Verificar LT: Demanda LT = 100 &times; 3 = 300. Stock (400) &ge; 300 &rarr; <span class="badge b-green">LT OK</span></li>
+            <li>Cobertura total = 100 &times; (3 + 3) = 600</li>
+            <li>Cantidad = 600 + 57.2 &minus; 400 = <strong>257 unidades</strong> (redondeado hacia arriba)</li>
+        </ol>
+        <p>Interpretaci&oacute;n: el stock actual (400) cubre los 3 meses de espera. Se pide lo necesario para completar la cobertura objetivo.</p>
+    </div>
 
     <h3>Caso 2: Stock NO cubre el Lead Time <span class="badge b-red">LT NO</span></h3>
-    <p>Cuando el stock actual &lt; (Demanda Mensual &times; Lead Time):</p>
+    <p>Cuando Stock Actual &lt; Pron&oacute;stico &times; Lead Time:</p>
     <div class="formula">
-        <span class="label">Lead Time NO cubierto &mdash; Pedido completo</span>
-        Cantidad = (Demanda &times; Stock Objetivo) + Stock Seguridad
+        <span class="label">F&oacute;rmula cuando LT NO est&aacute; cubierto</span>
+        Cantidad = (Pron&oacute;stico &times; Stock Objetivo) + Stock Seguridad
     </div>
-    <p><strong>&iquest;Por qu&eacute;?</strong> Si el stock no alcanza para cubrir el lead time, significa que el producto estar&aacute; en quiebre antes de que llegue el pedido. En esta situaci&oacute;n:</p>
+
+    <p><strong>&iquest;Por qu&eacute; es diferente?</strong></p>
     <ul>
-        <li>No tiene sentido descontar el stock actual (se agotar&aacute; antes de la llegada).</li>
-        <li>No se agrega el lead time a la cobertura (ya se asume que habr&aacute; quiebre durante ese per&iacute;odo).</li>
-        <li>Se pide una cantidad fresca para cubrir el stock objetivo + seguridad.</li>
+        <li><strong>No se descuenta el stock actual:</strong> Se agotar&aacute; antes de que llegue el pedido, as&iacute; que no contribuye a la cobertura futura.</li>
+        <li><strong>No se agrega el lead time a la cobertura:</strong> Ya habr&aacute; quiebre durante el lead time. El pedido cubre desde la llegada en adelante.</li>
+        <li>Se pide una cantidad completa para cubrir el stock objetivo + seguridad desde cero.</li>
     </ul>
 
-    <h3>Ejemplo Pr&aacute;ctico</h3>
     <div class="card">
-        <p><strong>Art&iacute;culo:</strong> Demanda mensual = 100 un. | Lead Time = 3 meses | Stock Objetivo = 3 meses | Stock de Seguridad = 86 un.</p>
+        <div class="card-title">Ejemplo: LT NO Cubierto</div>
+        <p><strong>Mismos datos pero con Stock Actual = 200 un.</strong></p>
+        <ol>
+            <li>Verificar LT: Demanda LT = 100 &times; 3 = 300. Stock (200) &lt; 300 &rarr; <span class="badge b-red">LT NO</span></li>
+            <li>Cobertura objetivo = 100 &times; 3 = 300</li>
+            <li>Cantidad = 300 + 57.2 = <strong>358 unidades</strong> (redondeado hacia arriba)</li>
+        </ol>
+        <p>Interpretaci&oacute;n: las 200 unidades actuales se vender&aacute;n durante el lead time (cubren solo 2 de 3 meses). El pedido es una reposici&oacute;n completa para el objetivo.</p>
+    </div>
+
+    <h3>Comparaci&oacute;n lado a lado</h3>
+    <div class="card">
+        <p><strong>Art&iacute;culo:</strong> Pron&oacute;stico = 100 un/mes | LT = 3 meses | Objetivo = 3 meses | SS = 57 un.</p>
         <table>
-            <tr><th>Escenario</th><th>Stock Actual</th><th>LT Demanda</th><th>LT</th><th>C&aacute;lculo</th><th>Pedido</th></tr>
+            <tr><th>Escenario</th><th>Stock</th><th>Demanda LT</th><th>LT</th><th>F&oacute;rmula</th><th>Pedido</th></tr>
             <tr>
-                <td>Stock suficiente</td><td>400 un.</td><td>300 un.</td><td><span class="badge b-green">OK</span></td>
-                <td>100&times;(3+3) + 86 &minus; 400</td><td><strong>286 un.</strong></td>
+                <td>Stock alto</td><td>400</td><td>300</td><td><span class="badge b-green">OK</span></td>
+                <td>100&times;(3+3) + 57 &minus; 400</td><td><strong>257 un.</strong></td>
             </tr>
             <tr>
-                <td>Stock insuficiente</td><td>200 un.</td><td>300 un.</td><td><span class="badge b-red">NO</span></td>
-                <td>100&times;3 + 86</td><td><strong>386 un.</strong></td>
+                <td>Stock medio</td><td>350</td><td>300</td><td><span class="badge b-green">OK</span></td>
+                <td>100&times;(3+3) + 57 &minus; 350</td><td><strong>307 un.</strong></td>
             </tr>
+            <tr>
+                <td>Stock justo LT</td><td>300</td><td>300</td><td><span class="badge b-green">OK</span></td>
+                <td>100&times;(3+3) + 57 &minus; 300</td><td><strong>357 un.</strong></td>
+            </tr>
+            <tr>
+                <td>Stock insuficiente</td><td>200</td><td>300</td><td><span class="badge b-red">NO</span></td>
+                <td>100&times;3 + 57</td><td><strong>357 un.</strong></td>
+            </tr>
+            <tr>
+                <td>Stock m&iacute;nimo</td><td>50</td><td>300</td><td><span class="badge b-red">NO</span></td>
+                <td>100&times;3 + 57</td><td><strong>357 un.</strong></td>
+            </tr>
+        </table>
+        <p>Note que cuando LT NO est&aacute; cubierto, la cantidad pedida es la misma sin importar cu&aacute;nto stock quede.</p>
+    </div>
+
+    <!-- 7.8 POST-PROCESAMIENTO -->
+    <h3>7.8 Post-procesamiento del Pedido</h3>
+    <p>Despu&eacute;s de calcular la cantidad base, se aplican dos ajustes:</p>
+
+    <div class="formula">
+        <span class="label">Cantidad M&iacute;nima</span>
+        Si 0 &lt; Cantidad &lt; M&iacute;nimo &rarr; Cantidad = M&iacute;nimo
+    </div>
+    <div class="formula">
+        <span class="label">Redondeo a M&uacute;ltiplo</span>
+        Si M&uacute;ltiplo &gt; 1 &rarr; Cantidad = Techo(Cantidad &divide; M&uacute;ltiplo) &times; M&uacute;ltiplo
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Post-procesamiento</div>
+        <p><strong>Cantidad calculada:</strong> 257 un. | M&iacute;nimo: 1 | M&uacute;ltiplo: 12 (docenas)</p>
+        <ul>
+            <li>257 &gt; M&iacute;nimo (1) &rarr; no aplica ajuste m&iacute;nimo</li>
+            <li>Redondeo: Techo(257 &divide; 12) &times; 12 = 22 &times; 12 = <strong>264 un.</strong></li>
+        </ul>
+        <p><strong>Otro ejemplo:</strong> Cantidad calculada: 3 un. | M&iacute;nimo: 10 | M&uacute;ltiplo: 1</p>
+        <ul>
+            <li>3 &lt; M&iacute;nimo (10) &rarr; se ajusta a <strong>10 un.</strong></li>
+        </ul>
+    </div>
+
+    <!-- 7.9 VALOR DEL PEDIDO -->
+    <h3>7.9 Valor del Pedido (FOB)</h3>
+    <div class="formula">
+        <span class="label">Valor del Pedido</span>
+        Valor FOB = Cantidad Sugerida &times; Costo FOB Unitario
+    </div>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Valor del Pedido</div>
+        <p>Cantidad = 264 un. | FOB = $12.50</p>
+        <ul>
+            <li>Valor = 264 &times; $12.50 = <strong>$3,300.00</strong></li>
+        </ul>
+        <p>Si se edita manualmente la cantidad a 240, el valor se actualiza autom&aacute;ticamente: 240 &times; $12.50 = $3,000.00</p>
+    </div>
+
+    <!-- 7.10 CLASIFICACIÓN ABC -->
+    <h3>7.10 Clasificaci&oacute;n ABC (por valor anual)</h3>
+    <p>Clasifica art&iacute;culos por su contribuci&oacute;n al valor total de ventas, basado en el principio de Pareto.</p>
+
+    <div class="formula">
+        <span class="label">Valor Anual por Art&iacute;culo</span>
+        Valor = FOB Unitario &times; Ventas Totales en Unidades
+    </div>
+
+    <p>Proceso:</p>
+    <ol>
+        <li>Calcular el valor anual de cada art&iacute;culo.</li>
+        <li>Ordenar de mayor a menor valor.</li>
+        <li>Calcular el porcentaje acumulado.</li>
+        <li>Asignar clase seg&uacute;n umbrales:</li>
+    </ol>
+
+    <table>
+        <tr><th>Clase</th><th>% Acumulado del Valor</th><th>T&iacute;picamente</th></tr>
+        <tr><td><span class="badge b-red">A</span></td><td>0% &ndash; 80%</td><td>~20% de los art&iacute;culos</td></tr>
+        <tr><td><span class="badge b-yellow">B</span></td><td>80% &ndash; 95%</td><td>~30% de los art&iacute;culos</td></tr>
+        <tr><td><span class="badge b-green">C</span></td><td>95% &ndash; 100%</td><td>~50% de los art&iacute;culos</td></tr>
+    </table>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Clasificaci&oacute;n ABC</div>
+        <p>5 art&iacute;culos con sus valores anuales:</p>
+        <table>
+            <tr><th>Art&iacute;culo</th><th>FOB</th><th>Ventas UN</th><th>Valor</th><th>% Acum.</th><th>Clase</th></tr>
+            <tr><td>SKU-001</td><td>$50</td><td>1,000</td><td>$50,000</td><td>50%</td><td><span class="badge b-red">A</span></td></tr>
+            <tr><td>SKU-002</td><td>$25</td><td>1,200</td><td>$30,000</td><td>80%</td><td><span class="badge b-red">A</span></td></tr>
+            <tr><td>SKU-003</td><td>$10</td><td>800</td><td>$8,000</td><td>88%</td><td><span class="badge b-yellow">B</span></td></tr>
+            <tr><td>SKU-004</td><td>$15</td><td>400</td><td>$6,000</td><td>94%</td><td><span class="badge b-yellow">B</span></td></tr>
+            <tr><td>SKU-005</td><td>$5</td><td>1,200</td><td>$6,000</td><td>100%</td><td><span class="badge b-green">C</span></td></tr>
+        </table>
+        <p>Total = $100,000. Los 2 primeros art&iacute;culos (40%) representan el 80% del valor &rarr; Clase A.</p>
+    </div>
+
+    <!-- 7.11 CLASIFICACIÓN XYZ -->
+    <h3>7.11 Clasificaci&oacute;n XYZ (por variabilidad)</h3>
+    <p>Mide qu&eacute; tan predecible es la demanda de un art&iacute;culo usando el Coeficiente de Variaci&oacute;n (CV) de las ventas mensuales.</p>
+
+    <div class="formula">
+        <span class="label">Coeficiente de Variaci&oacute;n</span>
+        CV = Desviaci&oacute;n Est&aacute;ndar de ventas mensuales &divide; Promedio de ventas mensuales
+    </div>
+
+    <table>
+        <tr><th>Clase</th><th>CV</th><th>Interpretaci&oacute;n</th></tr>
+        <tr><td><strong>X</strong></td><td>&lt; 0.5</td><td>Demanda estable &mdash; f&aacute;cil de planificar</td></tr>
+        <tr><td><strong>Y</strong></td><td>0.5 &ndash; 1.0</td><td>Demanda variable &mdash; requiere monitoreo</td></tr>
+        <tr><td><strong>Z</strong></td><td>&gt; 1.0 o &lt; 2 meses con venta</td><td>Demanda impredecible &mdash; dif&iacute;cil de planificar</td></tr>
+    </table>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: Clasificaci&oacute;n XYZ</div>
+        <p><strong>Art&iacute;culo X:</strong> Ventas = 100, 95, 105, 110, 98, 102, 97, 108, 103, 99, 106, 101</p>
+        <ul>
+            <li>Promedio = 102, Desv. Est. = 4.6</li>
+            <li>CV = 4.6 &divide; 102 = 0.045 &rarr; <strong>X</strong> (muy estable)</li>
+        </ul>
+        <p><strong>Art&iacute;culo Y:</strong> Ventas = 50, 120, 30, 90, 70, 140, 45, 110, 60, 85, 130, 55</p>
+        <ul>
+            <li>Promedio = 82, Desv. Est. = 36.1</li>
+            <li>CV = 36.1 &divide; 82 = 0.72 &rarr; <strong>Y</strong> (variable)</li>
+        </ul>
+        <p><strong>Art&iacute;culo Z:</strong> Ventas = 0, 0, 200, 0, 0, 0, 150, 0, 0, 0, 0, 180</p>
+        <ul>
+            <li>Promedio = 44, Desv. Est. = 78.3</li>
+            <li>CV = 78.3 &divide; 44 = 1.78 &rarr; <strong>Z</strong> (impredecible)</li>
+        </ul>
+    </div>
+
+    <!-- 7.12 EJEMPLO COMPLETO -->
+    <h3>7.12 Ejemplo Completo: De Datos a Pedido</h3>
+    <p>Recorrido completo de todos los c&aacute;lculos para un art&iacute;culo.</p>
+
+    <div class="card">
+        <div class="card-title">Art&iacute;culo SKU-1234 &mdash; "Shampoo Premium 500ml"</div>
+
+        <p><strong>Datos de entrada:</strong></p>
+        <table>
+            <tr><td>Stock Total</td><td>180 unidades</td></tr>
+            <tr><td>FOB</td><td>$8.50</td></tr>
+            <tr><td>Ventas UN (anual)</td><td>1,400</td></tr>
+            <tr><td>Lead Time</td><td>3 meses</td></tr>
+            <tr><td>Stock Objetivo</td><td>3 meses</td></tr>
+            <tr><td>Nivel de Servicio</td><td>95% (Z = 1.65)</td></tr>
+            <tr><td>Historial a usar</td><td>3 meses</td></tr>
+            <tr><td>M&iacute;nimo</td><td>1 un.</td></tr>
+            <tr><td>Redondeo</td><td>6 (media docena)</td></tr>
+        </table>
+        <p>Ventas mensuales (12 meses, reciente &rarr; antiguo):</p>
+        <p style="font-family:monospace; background:var(--bg); padding:0.5rem; border-radius:6px;">130, 110, 125, 95, 140, 105, 120, 115, 130, 100, 118, 112</p>
+
+        <p style="margin-top:1rem;"><strong>Paso 1: Clasificaci&oacute;n de Demanda</strong></p>
+        <ul>
+            <li>12 de 12 meses con demanda &rarr; ADI = 12/12 = <strong>1.00</strong></li>
+            <li>Promedio no-cero = 116.7, Desv. Est. no-cero = 13.0</li>
+            <li>CV&sup2; = (13.0/116.7)&sup2; = <strong>0.012</strong></li>
+            <li>ADI &lt; 1.32, CV&sup2; &lt; 0.49 &rarr; <span class="badge b-green">Suave</span></li>
+        </ul>
+
+        <p><strong>Paso 2: Pron&oacute;stico (Promedio M&oacute;vil, 3 meses)</strong></p>
+        <ul>
+            <li>Ventas recientes: 130, 110, 125 (todos &gt; 0)</li>
+            <li>Pron&oacute;stico = (130 + 110 + 125) &divide; 3 = <strong>121.7 un/mes</strong></li>
+        </ul>
+
+        <p><strong>Paso 3: Desviaci&oacute;n Est&aacute;ndar (3 meses recientes)</strong></p>
+        <ul>
+            <li>Promedio = 121.7</li>
+            <li>&sigma; = &radic;[((130&minus;121.7)&sup2; + (110&minus;121.7)&sup2; + (125&minus;121.7)&sup2;) &divide; 2] = &radic;[(68.9 + 136.9 + 10.9) &divide; 2] = &radic;108.3 = <strong>10.4</strong></li>
+        </ul>
+
+        <p><strong>Paso 4: Stock de Seguridad</strong></p>
+        <ul>
+            <li>SS = 1.65 &times; 10.4 &times; &radic;3 = 1.65 &times; 10.4 &times; 1.732 = <strong>29.7 unidades</strong></li>
+        </ul>
+
+        <p><strong>Paso 5: Punto de Reorden</strong></p>
+        <ul>
+            <li>ROP = (121.7 &times; 3) + 29.7 = 365.1 + 29.7 = <strong>394.8</strong></li>
+            <li>Stock (180) &lt; ROP (394.8) &rarr; Estado: <span class="badge b-red">Cr&iacute;tico</span> (180 &lt; 394.8 &times; 0.5 = 197.4? No. 180 &lt; 394.8? S&iacute; &rarr; <span class="badge b-yellow">Bajo</span>)</li>
+        </ul>
+
+        <p><strong>Paso 6: Verificaci&oacute;n de Lead Time</strong></p>
+        <ul>
+            <li>Demanda LT = 121.7 &times; 3 = 365.1</li>
+            <li>Stock (180) &lt; 365.1 &rarr; <span class="badge b-red">LT NO</span></li>
+        </ul>
+
+        <p><strong>Paso 7: Cantidad Sugerida (LT NO cubierto)</strong></p>
+        <ul>
+            <li>Cantidad = (121.7 &times; 3) + 29.7 = 365.1 + 29.7 = 394.8</li>
+            <li>Redondeado hacia arriba: 395</li>
+        </ul>
+
+        <p><strong>Paso 8: Post-procesamiento</strong></p>
+        <ul>
+            <li>395 &gt; M&iacute;nimo (1) &rarr; no aplica</li>
+            <li>Redondeo a m&uacute;ltiplo de 6: Techo(395 &divide; 6) &times; 6 = 66 &times; 6 = <strong>396 unidades</strong></li>
+        </ul>
+
+        <p><strong>Paso 9: Meses de Stock</strong></p>
+        <ul>
+            <li>180 &divide; 121.7 = <strong>1.5 meses</strong></li>
+        </ul>
+
+        <p><strong>Paso 10: Valor del Pedido</strong></p>
+        <ul>
+            <li>396 &times; $8.50 = <strong>$3,366.00</strong></li>
+        </ul>
+
+        <p style="margin-top:1rem;"><strong>Resumen final del art&iacute;culo:</strong></p>
+        <table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Estado</td><td><span class="badge b-yellow">Bajo</span></td></tr>
+            <tr><td>ABC-XYZ</td><td>Depende del ranking vs. otros art&iacute;culos</td></tr>
+            <tr><td>Patr&oacute;n</td><td><span class="badge b-green">Suave</span></td></tr>
+            <tr><td>Pron&oacute;stico</td><td>121.7 un/mes</td></tr>
+            <tr><td>M&eacute;todo</td><td>Promedio M&oacute;vil</td></tr>
+            <tr><td>Meses Stock</td><td>1.5</td></tr>
+            <tr><td>Stock Seg.</td><td>29.7</td></tr>
+            <tr><td>ROP</td><td>394.8</td></tr>
+            <tr><td>LT</td><td><span class="badge b-red">NO</span></td></tr>
+            <tr><td>Cant. Pedido</td><td>396</td></tr>
+            <tr><td>Valor FOB</td><td>$3,366.00</td></tr>
         </table>
     </div>
 
 
-    <!-- 9. CLASIFICACIONES -->
-    <h2 id="clasificacion">9. Clasificaciones ABC-XYZ y Patrones de Demanda</h2>
+    <!-- 8. CLASIFICACIONES -->
+    <h2 id="clasificacion">8. Resumen de Clasificaciones</h2>
 
     <h3>Clasificaci&oacute;n ABC (por valor)</h3>
     <p>Basada en el principio de Pareto. Los art&iacute;culos se ordenan por valor anual de ventas (FOB &times; Ventas UN):</p>
@@ -375,7 +814,7 @@
 
 
     <!-- 10. COLUMNAS -->
-    <h2 id="columnas">10. Referencia de Columnas</h2>
+    <h2 id="columnas">9. Referencia de Columnas</h2>
 
     <p>Use el bot&oacute;n <strong>"Columnas"</strong> en la esquina superior derecha de la tabla para mostrar u ocultar columnas seg&uacute;n sus necesidades.</p>
 
@@ -407,7 +846,7 @@
 
 
     <!-- 11. EDICIÓN -->
-    <h2 id="edicion">11. Edici&oacute;n Manual de Cantidades</h2>
+    <h2 id="edicion">10. Edici&oacute;n Manual de Cantidades</h2>
 
     <p>La columna <strong>"Cant. Pedido"</strong> es editable. Puede cambiar la cantidad sugerida directamente en la tabla:</p>
     <ul>
@@ -425,7 +864,7 @@
 
 
     <!-- 12. MARCADO -->
-    <h2 id="marcado">12. Marcado de Filas</h2>
+    <h2 id="marcado">11. Marcado de Filas</h2>
 
     <p>La primera columna de la tabla contiene un bot&oacute;n circular para <strong>marcar filas</strong>:</p>
     <ul>
@@ -439,7 +878,7 @@
 
 
     <!-- 13. FILTROS -->
-    <h2 id="filtros">13. Filtros y B&uacute;squeda</h2>
+    <h2 id="filtros">12. Filtros y B&uacute;squeda</h2>
 
     <p>La barra de filtros permite refinar la vista de resultados:</p>
     <table>
@@ -475,7 +914,7 @@
 
 
     <!-- 14. EXPORTACIÓN -->
-    <h2 id="exportar">14. Exportaci&oacute;n de Datos</h2>
+    <h2 id="exportar">13. Exportaci&oacute;n de Datos</h2>
 
     <h3>Exportar CSV</h3>
     <p>Genera un archivo .csv compatible con cualquier hoja de c&aacute;lculo.</p>
@@ -508,7 +947,7 @@
 
 
     <!-- 15. CONSEJOS -->
-    <h2 id="tips">15. Consejos y Mejores Pr&aacute;cticas</h2>
+    <h2 id="tips">14. Consejos y Mejores Pr&aacute;cticas</h2>
 
     <div class="card">
         <div class="card-title">Flujo de Trabajo Recomendado</div>
