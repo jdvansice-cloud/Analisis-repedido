@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gu&iacute;a de Uso &mdash; Calculadora de Pedidos de Reposici&oacute;n</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #16a34a;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+        .hero { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: white; padding: 2.5rem 2rem; text-align: center; }
+        .hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .hero p { font-size: 1rem; opacity: 0.85; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+        .toc { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; }
+        .toc h2 { font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary); }
+        .toc ol { padding-left: 1.2rem; }
+        .toc li { margin-bottom: 0.3rem; }
+        .toc a { color: var(--primary); text-decoration: none; font-size: 0.92rem; }
+        .toc a:hover { text-decoration: underline; }
+
+        h2 { font-size: 1.35rem; font-weight: 700; color: var(--primary); margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border); }
+        h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 0.5rem; }
+        p { margin-bottom: 0.8rem; font-size: 0.93rem; }
+        ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.4rem; font-size: 0.93rem; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+        .card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        .tip { background: #eff6ff; border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.88rem; color: #1e40af; }
+        .warning { background: #fffbeb; border-left: 4px solid var(--warning); padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.88rem; color: #92400e; }
+        .important { background: #fef2f2; border-left: 4px solid var(--danger); padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.88rem; color: #991b1b; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        table th { background: #f1f5f9; padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); }
+        table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+        table tr:hover { background: #f8fafc; }
+
+        .badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .b-red { background: #fef2f2; color: #dc2626; }
+        .b-yellow { background: #fffbeb; color: #d97706; }
+        .b-blue { background: #eff6ff; color: #2563eb; }
+        .b-green { background: #f0fdf4; color: #16a34a; }
+        .b-gray { background: #f8fafc; color: #94a3b8; }
+        .b-purple { background: #f5f3ff; color: #7c3aed; }
+
+        .formula { background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem; line-height: 1.8; }
+        .formula .label { color: var(--muted); font-size: 0.78rem; display: block; margin-bottom: 0.3rem; font-family: -apple-system, sans-serif; }
+
+        .step-number { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; font-size: 0.82rem; font-weight: 700; margin-right: 0.5rem; flex-shrink: 0; }
+
+        .columns-table td:first-child { font-weight: 600; white-space: nowrap; }
+        .columns-table td:nth-child(2) { color: var(--text-light); }
+
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: white; text-decoration: none; font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem; }
+        .back-link:hover { opacity: 1; }
+
+        @media print {
+            .hero { background: #1e3a5f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .tip, .warning, .important { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { font-size: 11pt; }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .hero { padding: 1.5rem 1rem; }
+            .hero h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Gu&iacute;a de Uso</h1>
+    <p>Calculadora de Pedidos de Reposici&oacute;n &mdash; Manual para el Gerente de Compras</p>
+    <a href="/" class="back-link">&larr; Volver a la Calculadora</a>
+</div>
+
+<div class="container">
+
+    <div class="toc">
+        <h2>Contenido</h2>
+        <ol>
+            <li><a href="#inicio">Inicio R&aacute;pido</a></li>
+            <li><a href="#archivo">Preparaci&oacute;n del Archivo Excel</a></li>
+            <li><a href="#parametros">Par&aacute;metros de Configuraci&oacute;n</a></li>
+            <li><a href="#exclusion">Exclusi&oacute;n de Meses</a></li>
+            <li><a href="#presets">Presets (Configuraciones Guardadas)</a></li>
+            <li><a href="#resultados">Interpretaci&oacute;n de Resultados</a></li>
+            <li><a href="#formula">F&oacute;rmulas de C&aacute;lculo</a></li>
+            <li><a href="#leadtime">Regla de Lead Time</a></li>
+            <li><a href="#clasificacion">Clasificaciones ABC-XYZ y Patrones de Demanda</a></li>
+            <li><a href="#columnas">Referencia de Columnas</a></li>
+            <li><a href="#edicion">Edici&oacute;n Manual de Cantidades</a></li>
+            <li><a href="#marcado">Marcado de Filas</a></li>
+            <li><a href="#filtros">Filtros y B&uacute;squeda</a></li>
+            <li><a href="#exportar">Exportaci&oacute;n de Datos</a></li>
+            <li><a href="#tips">Consejos y Mejores Pr&aacute;cticas</a></li>
+        </ol>
+    </div>
+
+    <!-- 1. INICIO RÁPIDO -->
+    <h2 id="inicio">1. Inicio R&aacute;pido</h2>
+
+    <div class="card">
+        <div class="card-title"><span class="step-number">1</span> Suba su archivo Excel</div>
+        <p>Arrastre y suelte su archivo de inventario (.xlsx o .xls) en la zona de carga, o haga clic para seleccionarlo. El archivo no debe exceder 50 MB.</p>
+    </div>
+    <div class="card">
+        <div class="card-title"><span class="step-number">2</span> Configure los par&aacute;metros</div>
+        <p>Ajuste el tiempo de entrega, stock objetivo, nivel de servicio y otros par&aacute;metros seg&uacute;n las necesidades de su proveedor y pol&iacute;tica de inventario.</p>
+    </div>
+    <div class="card">
+        <div class="card-title"><span class="step-number">3</span> Haga clic en "Calcular Pedidos"</div>
+        <p>El sistema analizar&aacute; la demanda, clasificar&aacute; los art&iacute;culos y generar&aacute; cantidades sugeridas de pedido para cada SKU.</p>
+    </div>
+    <div class="card">
+        <div class="card-title"><span class="step-number">4</span> Revise, edite y exporte</div>
+        <p>Revise las recomendaciones, ajuste cantidades manualmente si es necesario, marque filas importantes y exporte el resultado en CSV o Excel.</p>
+    </div>
+
+
+    <!-- 2. ARCHIVO EXCEL -->
+    <h2 id="archivo">2. Preparaci&oacute;n del Archivo Excel</h2>
+
+    <p>El archivo debe contener una fila de encabezado con la columna <strong>"Material"</strong> en las primeras 10 filas. El sistema detectar&aacute; autom&aacute;ticamente la fila de encabezado.</p>
+
+    <h3>Columnas requeridas</h3>
+    <table>
+        <tr><th>Columna</th><th>Descripci&oacute;n</th><th>Tipo</th></tr>
+        <tr><td>Material</td><td>C&oacute;digo &uacute;nico del art&iacute;culo (SKU)</td><td>Texto</td></tr>
+        <tr><td>Descripcion</td><td>Nombre o descripci&oacute;n del producto</td><td>Texto</td></tr>
+        <tr><td>Stock Total</td><td>Inventario total actual (todas las ubicaciones)</td><td>N&uacute;mero</td></tr>
+        <tr><td>Vta 01 a Vta 12</td><td>Ventas mensuales (Vta 01 = mes m&aacute;s reciente)</td><td>N&uacute;mero</td></tr>
+        <tr><td>FOB</td><td>Costo unitario FOB (para valorizar pedidos)</td><td>N&uacute;mero</td></tr>
+        <tr><td>Ventas UN</td><td>Ventas totales en unidades (para clasificaci&oacute;n ABC)</td><td>N&uacute;mero</td></tr>
+    </table>
+
+    <h3>Columnas opcionales</h3>
+    <table>
+        <tr><th>Columna</th><th>Descripci&oacute;n</th></tr>
+        <tr><td>Marca</td><td>Marca del producto</td></tr>
+        <tr><td>Cod. Proveedor Actual</td><td>C&oacute;digo del proveedor (para agrupaci&oacute;n)</td></tr>
+        <tr><td>Stock CEDI</td><td>Stock en centro de distribuci&oacute;n</td></tr>
+        <tr><td>Stock Tiendas</td><td>Stock en tiendas</td></tr>
+        <tr><td>Fe. Comp</td><td>Fecha de &uacute;ltima compra</td></tr>
+        <tr><td>Cant.</td><td>Cantidad de &uacute;ltima compra</td></tr>
+        <tr><td>Costo</td><td>Costo unitario local</td></tr>
+        <tr><td>PVP</td><td>Precio de venta al p&uacute;blico</td></tr>
+        <tr><td>Vta Prom Mensual</td><td>Promedio mensual de ventas (fallback)</td></tr>
+    </table>
+
+    <div class="tip">
+        <strong>Tip:</strong> Las columnas de ventas mensuales (Vta 01&ndash;Vta 12) deben estar ordenadas del mes m&aacute;s reciente (Vta 01) al m&aacute;s antiguo (Vta 12). Los nombres se mapean autom&aacute;ticamente a los meses calendario correspondientes.
+    </div>
+
+
+    <!-- 3. PARÁMETROS -->
+    <h2 id="parametros">3. Par&aacute;metros de Configuraci&oacute;n</h2>
+
+    <table>
+        <tr><th>Par&aacute;metro</th><th>Descripci&oacute;n</th><th>Valor T&iacute;pico</th></tr>
+        <tr>
+            <td><strong>Tiempo de Entrega (meses)</strong></td>
+            <td>Tiempo entre colocar el pedido y recibir la mercader&iacute;a. Incluya transporte, aduanas y procesamiento.</td>
+            <td>2&ndash;4 meses</td>
+        </tr>
+        <tr>
+            <td><strong>Stock Objetivo (meses)</strong></td>
+            <td>Cu&aacute;ntos meses de inventario desea tener disponible despu&eacute;s de recibir el pedido.</td>
+            <td>2&ndash;4 meses</td>
+        </tr>
+        <tr>
+            <td><strong>Nivel de Servicio (%)</strong></td>
+            <td>Probabilidad de no tener quiebre de stock. Un nivel m&aacute;s alto genera m&aacute;s stock de seguridad.</td>
+            <td>95%</td>
+        </tr>
+        <tr>
+            <td><strong>Historial de Ventas</strong></td>
+            <td>Cu&aacute;ntos meses recientes usar para calcular el promedio m&oacute;vil (productos con demanda suave/err&aacute;tica).</td>
+            <td>3 meses</td>
+        </tr>
+        <tr>
+            <td><strong>Cantidad M&iacute;nima</strong></td>
+            <td>Si el c&aacute;lculo sugiere una cantidad mayor a 0 pero menor a este valor, se redondea hacia arriba al m&iacute;nimo.</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td><strong>Redondear a M&uacute;ltiplo</strong></td>
+            <td>Las cantidades se redondean hacia arriba al m&uacute;ltiplo m&aacute;s cercano. &Uacute;til para empaques o cajas.</td>
+            <td>1 (sin redondeo)</td>
+        </tr>
+    </table>
+
+    <div class="warning">
+        <strong>Nota:</strong> Un nivel de servicio del 99% puede generar hasta 40% m&aacute;s stock de seguridad que un 95%. Use niveles altos solo para art&iacute;culos cr&iacute;ticos (Clase A).
+    </div>
+
+
+    <!-- 4. EXCLUSIÓN DE MESES -->
+    <h2 id="exclusion">4. Exclusi&oacute;n de Meses</h2>
+
+    <p>Los chips de meses debajo de los par&aacute;metros permiten excluir meses espec&iacute;ficos del an&aacute;lisis. Esto es &uacute;til para:</p>
+    <ul>
+        <li><strong>Meses at&iacute;picos:</strong> Excluya meses con promociones agresivas o eventos especiales que distorsionen la demanda real.</li>
+        <li><strong>Estacionalidad:</strong> Excluya meses donde un producto no se vende (ej: art&iacute;culos de verano en invierno).</li>
+        <li><strong>Datos incompletos:</strong> Excluya meses donde los datos de ventas no son confiables.</li>
+    </ul>
+    <p>Haga clic en un chip de mes para alternar entre incluido (<span class="badge b-blue">&#10003; Mar 25</span>) y excluido (<span class="badge b-gray" style="text-decoration:line-through;">&#10007; Mar 25</span>). Los meses excluidos se muestran tachados en la tabla de resultados.</p>
+
+    <div class="tip">
+        <strong>Tip:</strong> La exclusi&oacute;n afecta tanto la clasificaci&oacute;n de demanda (ADI/CV&sup2;) como el c&aacute;lculo del promedio m&oacute;vil. Pero la clasificaci&oacute;n ABC no se ve afectada ya que usa datos anuales totales.
+    </div>
+
+
+    <!-- 5. PRESETS -->
+    <h2 id="presets">5. Presets (Configuraciones Guardadas)</h2>
+
+    <p>Los presets le permiten guardar combinaciones de par&aacute;metros para reutilizarlas r&aacute;pidamente:</p>
+    <ul>
+        <li><strong>Guardar:</strong> Configure sus par&aacute;metros, haga clic en "Guardar" e ingrese un nombre descriptivo (ej: "Proveedor China 3+3", "Local r&aacute;pido 1+2").</li>
+        <li><strong>Cargar:</strong> Seleccione un preset del men&uacute; desplegable para aplicar instant&aacute;neamente todos sus par&aacute;metros, incluyendo meses excluidos.</li>
+        <li><strong>Eliminar:</strong> Seleccione el preset y haga clic en "Eliminar".</li>
+    </ul>
+    <p>Los presets se guardan en su navegador (localStorage) y persisten entre sesiones.</p>
+
+
+    <!-- 6. RESULTADOS -->
+    <h2 id="resultados">6. Interpretaci&oacute;n de Resultados</h2>
+
+    <h3>Panel de Resumen</h3>
+    <p>Despu&eacute;s de calcular, ver&aacute; tarjetas de resumen con:</p>
+    <ul>
+        <li><strong>Total SKUs:</strong> N&uacute;mero total de art&iacute;culos analizados.</li>
+        <li><strong>Art&iacute;culos a Pedir:</strong> Cu&aacute;ntos tienen cantidad sugerida mayor a 0.</li>
+        <li><strong>Unidades Totales:</strong> Suma de todas las cantidades sugeridas.</li>
+        <li><strong>Stock Cr&iacute;tico:</strong> Art&iacute;culos con stock por debajo del 50% del punto de reorden.</li>
+        <li><strong>Stock Bajo:</strong> Art&iacute;culos con stock por debajo del punto de reorden.</li>
+        <li><strong>Valor Total (FOB):</strong> Valor total del pedido sugerido a costo FOB.</li>
+        <li><strong>Sin Ventas:</strong> Art&iacute;culos sin demanda en el per&iacute;odo analizado.</li>
+    </ul>
+    <p>Estos totales se actualizan autom&aacute;ticamente cuando edita cantidades manualmente.</p>
+
+    <h3>Estados de Art&iacute;culos</h3>
+    <table>
+        <tr><th>Estado</th><th>Significado</th><th>Acci&oacute;n Recomendada</th></tr>
+        <tr><td><span class="badge b-red">Cr&iacute;tico</span></td><td>Stock &le; 50% del punto de reorden</td><td>Pedir con urgencia; considerar env&iacute;o a&eacute;reo</td></tr>
+        <tr><td><span class="badge b-yellow">Bajo</span></td><td>Stock &le; punto de reorden</td><td>Incluir en pr&oacute;ximo pedido</td></tr>
+        <tr><td><span class="badge b-blue">Reponer</span></td><td>Necesita reposici&oacute;n seg&uacute;n cobertura objetivo</td><td>Incluir en pedido regular</td></tr>
+        <tr><td><span class="badge b-green">OK</span></td><td>Stock suficiente</td><td>No requiere acci&oacute;n</td></tr>
+        <tr><td><span class="badge b-gray">Sin Ventas</span></td><td>Sin demanda en per&iacute;odo analizado</td><td>Evaluar descontinuaci&oacute;n o liquidaci&oacute;n</td></tr>
+    </table>
+
+
+    <!-- 7. FÓRMULAS -->
+    <h2 id="formula">7. F&oacute;rmulas de C&aacute;lculo</h2>
+
+    <h3>Pron&oacute;stico de Demanda</h3>
+    <p>El sistema selecciona autom&aacute;ticamente el m&eacute;todo de pron&oacute;stico seg&uacute;n el patr&oacute;n de demanda del art&iacute;culo:</p>
+    <table>
+        <tr><th>Patr&oacute;n</th><th>M&eacute;todo</th><th>L&oacute;gica</th></tr>
+        <tr><td>Suave / Err&aacute;tica</td><td>Promedio M&oacute;vil</td><td>Suma de ventas recientes &divide; meses con venta</td></tr>
+        <tr><td>Intermitente / Irregular</td><td>Croston SBA</td><td>Usa los 12 meses completos con correcci&oacute;n de sesgo</td></tr>
+        <tr><td>Sin Demanda</td><td>N/A</td><td>Sin pron&oacute;stico (cantidad sugerida = 0)</td></tr>
+    </table>
+
+    <h3>Stock de Seguridad</h3>
+    <div class="formula">
+        <span class="label">Stock de Seguridad</span>
+        SS = Z &times; &sigma; &times; &radic;LT
+    </div>
+    <p>Donde <strong>Z</strong> es el valor Z del nivel de servicio, <strong>&sigma;</strong> es la desviaci&oacute;n est&aacute;ndar de la demanda reciente, y <strong>LT</strong> es el tiempo de entrega en meses.</p>
+
+    <h3>Punto de Reorden (ROP)</h3>
+    <div class="formula">
+        <span class="label">Punto de Reorden</span>
+        ROP = (Demanda Mensual &times; Lead Time) + Stock de Seguridad
+    </div>
+
+    <h3>Cantidad Sugerida</h3>
+    <p>La f&oacute;rmula depende de si el stock actual cubre la demanda durante el lead time (ver secci&oacute;n siguiente).</p>
+
+
+    <!-- 8. REGLA DE LEAD TIME -->
+    <h2 id="leadtime">8. Regla de Lead Time</h2>
+
+    <div class="important">
+        <strong>Regla clave:</strong> El sistema verifica si el stock actual es suficiente para cubrir la demanda durante el tiempo de entrega antes de calcular la cantidad de pedido.
+    </div>
+
+    <h3>Caso 1: Stock cubre el Lead Time <span class="badge b-green">LT OK</span></h3>
+    <p>Cuando el stock actual &ge; (Demanda Mensual &times; Lead Time):</p>
+    <div class="formula">
+        <span class="label">Lead Time cubierto &mdash; F&oacute;rmula normal</span>
+        Cantidad = (Demanda &times; (Lead Time + Stock Objetivo)) + Stock Seguridad &minus; Stock Actual
+    </div>
+    <p>El stock actual se descuenta porque es suficiente para aguantar mientras llega el pedido.</p>
+
+    <h3>Caso 2: Stock NO cubre el Lead Time <span class="badge b-red">LT NO</span></h3>
+    <p>Cuando el stock actual &lt; (Demanda Mensual &times; Lead Time):</p>
+    <div class="formula">
+        <span class="label">Lead Time NO cubierto &mdash; Pedido completo</span>
+        Cantidad = (Demanda &times; Stock Objetivo) + Stock Seguridad
+    </div>
+    <p><strong>&iquest;Por qu&eacute;?</strong> Si el stock no alcanza para cubrir el lead time, significa que el producto estar&aacute; en quiebre antes de que llegue el pedido. En esta situaci&oacute;n:</p>
+    <ul>
+        <li>No tiene sentido descontar el stock actual (se agotar&aacute; antes de la llegada).</li>
+        <li>No se agrega el lead time a la cobertura (ya se asume que habr&aacute; quiebre durante ese per&iacute;odo).</li>
+        <li>Se pide una cantidad fresca para cubrir el stock objetivo + seguridad.</li>
+    </ul>
+
+    <h3>Ejemplo Pr&aacute;ctico</h3>
+    <div class="card">
+        <p><strong>Art&iacute;culo:</strong> Demanda mensual = 100 un. | Lead Time = 3 meses | Stock Objetivo = 3 meses | Stock de Seguridad = 86 un.</p>
+        <table>
+            <tr><th>Escenario</th><th>Stock Actual</th><th>LT Demanda</th><th>LT</th><th>C&aacute;lculo</th><th>Pedido</th></tr>
+            <tr>
+                <td>Stock suficiente</td><td>400 un.</td><td>300 un.</td><td><span class="badge b-green">OK</span></td>
+                <td>100&times;(3+3) + 86 &minus; 400</td><td><strong>286 un.</strong></td>
+            </tr>
+            <tr>
+                <td>Stock insuficiente</td><td>200 un.</td><td>300 un.</td><td><span class="badge b-red">NO</span></td>
+                <td>100&times;3 + 86</td><td><strong>386 un.</strong></td>
+            </tr>
+        </table>
+    </div>
+
+
+    <!-- 9. CLASIFICACIONES -->
+    <h2 id="clasificacion">9. Clasificaciones ABC-XYZ y Patrones de Demanda</h2>
+
+    <h3>Clasificaci&oacute;n ABC (por valor)</h3>
+    <p>Basada en el principio de Pareto. Los art&iacute;culos se ordenan por valor anual de ventas (FOB &times; Ventas UN):</p>
+    <table>
+        <tr><th>Clase</th><th>Criterio</th><th>Interpretaci&oacute;n</th></tr>
+        <tr><td><span class="badge b-red">A</span></td><td>80% del valor acumulado</td><td>Art&iacute;culos de alto valor &mdash; requieren atenci&oacute;n prioritaria</td></tr>
+        <tr><td><span class="badge b-yellow">B</span></td><td>Siguiente 15% del valor</td><td>Art&iacute;culos de valor medio &mdash; gesti&oacute;n est&aacute;ndar</td></tr>
+        <tr><td><span class="badge b-green">C</span></td><td>Restante 5% del valor</td><td>Art&iacute;culos de bajo valor &mdash; gesti&oacute;n simplificada</td></tr>
+    </table>
+
+    <h3>Clasificaci&oacute;n XYZ (por variabilidad)</h3>
+    <p>Basada en el coeficiente de variaci&oacute;n (CV) de las ventas mensuales:</p>
+    <table>
+        <tr><th>Clase</th><th>CV</th><th>Interpretaci&oacute;n</th></tr>
+        <tr><td><strong>X</strong></td><td>&lt; 0.5</td><td>Demanda estable y predecible</td></tr>
+        <tr><td><strong>Y</strong></td><td>0.5 &ndash; 1.0</td><td>Demanda variable, parcialmente predecible</td></tr>
+        <tr><td><strong>Z</strong></td><td>&gt; 1.0</td><td>Demanda impredecible, altamente variable</td></tr>
+    </table>
+
+    <h3>Patrones de Demanda (Syntetos-Boylan)</h3>
+    <p>Clasifica la demanda en base a la frecuencia (ADI) y la variaci&oacute;n de tama&ntilde;o (CV&sup2;):</p>
+    <table>
+        <tr><th>Patr&oacute;n</th><th>ADI</th><th>CV&sup2;</th><th>Descripci&oacute;n</th></tr>
+        <tr><td><span class="badge b-green">Suave</span></td><td>&lt; 1.32</td><td>&lt; 0.49</td><td>Demanda frecuente y consistente. F&aacute;cil de pronosticar.</td></tr>
+        <tr><td><span class="badge b-yellow">Err&aacute;tica</span></td><td>&lt; 1.32</td><td>&ge; 0.49</td><td>Demanda frecuente pero cantidades variables. Requiere m&aacute;s stock de seguridad.</td></tr>
+        <tr><td><span class="badge b-blue">Intermitente</span></td><td>&ge; 1.32</td><td>&lt; 0.49</td><td>Demanda espor&aacute;dica pero cuando ocurre es de tama&ntilde;o similar.</td></tr>
+        <tr><td><span class="badge b-red">Irregular</span></td><td>&ge; 1.32</td><td>&ge; 0.49</td><td>Demanda espor&aacute;dica y de tama&ntilde;o variable. La m&aacute;s dif&iacute;cil de pronosticar.</td></tr>
+    </table>
+
+
+    <!-- 10. COLUMNAS -->
+    <h2 id="columnas">10. Referencia de Columnas</h2>
+
+    <p>Use el bot&oacute;n <strong>"Columnas"</strong> en la esquina superior derecha de la tabla para mostrar u ocultar columnas seg&uacute;n sus necesidades.</p>
+
+    <table class="columns-table">
+        <tr><th>Columna</th><th>Descripci&oacute;n</th></tr>
+        <tr><td>Estado</td><td>Cr&iacute;tico, Bajo, Reponer, OK o Sin Ventas</td></tr>
+        <tr><td>ABC-XYZ</td><td>Clasificaci&oacute;n combinada (ej: AX, BY, CZ)</td></tr>
+        <tr><td>Patr&oacute;n</td><td>Patr&oacute;n de demanda (Suave, Err&aacute;tica, Intermitente, Irregular)</td></tr>
+        <tr><td>Material</td><td>C&oacute;digo SKU del art&iacute;culo</td></tr>
+        <tr><td>Marca</td><td>Marca del producto</td></tr>
+        <tr><td>Proveedor</td><td>C&oacute;digo del proveedor actual</td></tr>
+        <tr><td>Descripci&oacute;n</td><td>Nombre del producto</td></tr>
+        <tr><td>&Uacute;lt. Compra</td><td>Fecha de la &uacute;ltima compra (Mes A&ntilde;o)</td></tr>
+        <tr><td>Cant. Comp.</td><td>Cantidad de la &uacute;ltima compra</td></tr>
+        <tr><td>CEDI</td><td>Stock en centro de distribuci&oacute;n</td></tr>
+        <tr><td>Tiendas</td><td>Stock en tiendas</td></tr>
+        <tr><td>Stock</td><td>Stock total (CEDI + Tiendas)</td></tr>
+        <tr><td>Meses (Vta 01&ndash;12)</td><td>Ventas por mes (del m&aacute;s reciente al m&aacute;s antiguo)</td></tr>
+        <tr><td>Pron&oacute;stico</td><td>Demanda mensual pronosticada (seg&uacute;n m&eacute;todo)</td></tr>
+        <tr><td>M&eacute;todo</td><td>M&eacute;todo de pron&oacute;stico utilizado</td></tr>
+        <tr><td>Meses Stock</td><td>Cu&aacute;ntos meses de venta cubre el stock actual</td></tr>
+        <tr><td>Stock Seg.</td><td>Stock de seguridad calculado (unidades)</td></tr>
+        <tr><td>ROP</td><td>Punto de reorden (demanda en LT + stock seg.)</td></tr>
+        <tr><td>LT</td><td>Si el stock cubre el lead time (OK = s&iacute;, NO = no)</td></tr>
+        <tr><td>Cant. Pedido</td><td>Cantidad sugerida (editable)</td></tr>
+        <tr><td>FOB $</td><td>Costo unitario FOB</td></tr>
+        <tr><td>Valor $</td><td>Valor total del pedido (Cant. &times; FOB)</td></tr>
+    </table>
+
+
+    <!-- 11. EDICIÓN -->
+    <h2 id="edicion">11. Edici&oacute;n Manual de Cantidades</h2>
+
+    <p>La columna <strong>"Cant. Pedido"</strong> es editable. Puede cambiar la cantidad sugerida directamente en la tabla:</p>
+    <ul>
+        <li>Haga clic en el campo num&eacute;rico y escriba la nueva cantidad.</li>
+        <li>Presione <strong>Enter</strong> o haga clic fuera del campo para confirmar.</li>
+        <li>Las celdas editadas se resaltan en amarillo con un asterisco <span style="color:#f59e0b;font-weight:700">*</span>.</li>
+        <li>El valor del pedido (Valor $) y todos los totales del resumen se actualizan autom&aacute;ticamente.</li>
+        <li>Un banner amarillo muestra cu&aacute;ntas cantidades han sido editadas.</li>
+    </ul>
+    <p>Haga clic en <strong>"Restaurar Cantidades"</strong> para revertir todas las ediciones a los valores calculados.</p>
+
+    <div class="tip">
+        <strong>Tip:</strong> Al exportar, tanto la cantidad sugerida original como la cantidad final editada se incluyen en columnas separadas, junto con una columna "Editado" (Si/No) para trazabilidad.
+    </div>
+
+
+    <!-- 12. MARCADO -->
+    <h2 id="marcado">12. Marcado de Filas</h2>
+
+    <p>La primera columna de la tabla contiene un bot&oacute;n circular para <strong>marcar filas</strong>:</p>
+    <ul>
+        <li>Haga clic en el c&iacute;rculo <span class="badge b-purple">&#10003;</span> para marcar una fila con color p&uacute;rpura.</li>
+        <li>Las filas marcadas mantienen su color al desplazarse horizontalmente, facilitando el seguimiento visual.</li>
+        <li>Use el filtro <strong>"Marcados"</strong> en el men&uacute; desplegable para ver solo las filas marcadas.</li>
+        <li>El contador de marcas aparece junto a los filtros.</li>
+        <li>Haga clic en <strong>"Limpiar Marcas"</strong> para desmarcar todas las filas.</li>
+    </ul>
+    <p>Casos de uso t&iacute;picos: marcar art&iacute;culos que necesitan revisi&oacute;n especial, art&iacute;culos ya confirmados, o art&iacute;culos para discutir con el equipo.</p>
+
+
+    <!-- 13. FILTROS -->
+    <h2 id="filtros">13. Filtros y B&uacute;squeda</h2>
+
+    <p>La barra de filtros permite refinar la vista de resultados:</p>
+    <table>
+        <tr><th>Filtro</th><th>Descripci&oacute;n</th></tr>
+        <tr><td><strong>B&uacute;squeda</strong></td><td>Busca por material, descripci&oacute;n, marca o c&oacute;digo de proveedor</td></tr>
+        <tr><td><strong>Estado</strong></td><td>Filtra por estado (Cr&iacute;tico, Bajo, Reponer, OK, Sin Ventas)</td></tr>
+        <tr><td><strong>Patr&oacute;n</strong></td><td>Filtra por patr&oacute;n de demanda</td></tr>
+        <tr><td><strong>ABC</strong></td><td>Filtra por clasificaci&oacute;n ABC (A, B o C)</td></tr>
+        <tr><td><strong>A&ntilde;o</strong></td><td>Filtra por a&ntilde;o de &uacute;ltima compra</td></tr>
+        <tr><td><strong>Otros</strong></td><td>Necesita Pedido, No Necesita, Editados, Marcados</td></tr>
+    </table>
+
+    <p>Opciones adicionales:</p>
+    <ul>
+        <li><strong>Agrupar por Proveedor:</strong> Agrupa las filas por c&oacute;digo de proveedor con subtotales de unidades y valor por proveedor.</li>
+        <li><strong>Columnas:</strong> Muestra/oculta columnas individuales o el bloque completo de ventas mensuales.</li>
+        <li><strong>Tama&ntilde;o de p&aacute;gina:</strong> Configure cu&aacute;ntas filas mostrar (50, 100, 250 o todas).</li>
+        <li><strong>Ordenar:</strong> Haga clic en cualquier encabezado de columna para ordenar ascendente/descendente.</li>
+    </ul>
+
+
+    <!-- 14. EXPORTACIÓN -->
+    <h2 id="exportar">14. Exportaci&oacute;n de Datos</h2>
+
+    <h3>Exportar CSV</h3>
+    <p>Genera un archivo .csv con todos los datos (sin filtrar). Compatible con cualquier hoja de c&aacute;lculo.</p>
+
+    <h3>Exportar Excel</h3>
+    <p>Genera un archivo .xlsx con dos hojas:</p>
+    <ul>
+        <li><strong>Pedidos:</strong> Todos los datos detallados con columnas autoajustadas.</li>
+        <li><strong>Resumen:</strong> Resumen ejecutivo con totales, clasificaci&oacute;n ABC-XYZ y patrones de demanda.</li>
+    </ul>
+    <p>Ambas exportaciones incluyen tanto la cantidad sugerida como la cantidad editada (si aplica).</p>
+
+    <div class="tip">
+        <strong>Tip:</strong> La exportaci&oacute;n siempre incluye <em>todos</em> los art&iacute;culos, independientemente de los filtros activos. Esto asegura que no se pierda informaci&oacute;n.
+    </div>
+
+
+    <!-- 15. CONSEJOS -->
+    <h2 id="tips">15. Consejos y Mejores Pr&aacute;cticas</h2>
+
+    <div class="card">
+        <div class="card-title">Flujo de Trabajo Recomendado</div>
+        <ol>
+            <li>Cargue el archivo y calcule con sus par&aacute;metros habituales.</li>
+            <li>Revise primero los art&iacute;culos <span class="badge b-red">Cr&iacute;tico</span> y <span class="badge b-yellow">Bajo</span>.</li>
+            <li>Filtre por <strong>Clase A</strong> para priorizar los art&iacute;culos de mayor valor.</li>
+            <li>Agrupe por proveedor para armar pedidos consolidados.</li>
+            <li>Marque los art&iacute;culos revisados y ajuste cantidades seg&uacute;n negociaciones.</li>
+            <li>Exporte a Excel para compartir con el equipo o enviar al proveedor.</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Nivel de Servicio por Clase</div>
+        <p>Considere usar niveles de servicio diferenciados:</p>
+        <ul>
+            <li><strong>Clase A:</strong> 97&ndash;99% (alto costo de quiebre)</li>
+            <li><strong>Clase B:</strong> 95% (balance est&aacute;ndar)</li>
+            <li><strong>Clase C:</strong> 90&ndash;92% (menor impacto financiero)</li>
+        </ul>
+        <p>Puede calcular por separado filtrando en Excel o realizando m&uacute;ltiples corridas con diferentes par&aacute;metros.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Art&iacute;culos Sin Ventas</div>
+        <p>Los art&iacute;culos clasificados como <span class="badge b-gray">Sin Ventas</span> merecen atenci&oacute;n especial:</p>
+        <ul>
+            <li>Verifique si son art&iacute;culos nuevos que a&uacute;n no tienen historial.</li>
+            <li>Eval&uacute;e si son art&iacute;culos obsoletos candidatos a liquidaci&oacute;n.</li>
+            <li>Considere si la ausencia de ventas se debe a quiebre de stock previo.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Demanda Intermitente/Irregular</div>
+        <p>Estos art&iacute;culos usan el m&eacute;todo Croston SBA que considera los 12 meses completos (no solo los meses recientes). Esto genera pron&oacute;sticos m&aacute;s bajos pero m&aacute;s realistas para productos que no se venden todos los meses.</p>
+        <p>Si un art&iacute;culo intermitente tiene un pron&oacute;stico que le parece bajo, puede editar la cantidad manualmente.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Tema Oscuro e Impresi&oacute;n</div>
+        <ul>
+            <li>Use el bot&oacute;n de tema en el encabezado para cambiar entre modo claro y oscuro. La preferencia se guarda autom&aacute;ticamente.</li>
+            <li>Para imprimir los resultados, use Ctrl+P (Cmd+P en Mac). Los controles se ocultan autom&aacute;ticamente y la tabla se muestra completa.</li>
+        </ul>
+    </div>
+
+    <p style="text-align:center; margin-top:3rem; color:var(--muted); font-size:0.85rem;">
+        &mdash; Fin de la Gu&iacute;a &mdash;
+    </p>
+
+</div>
+
+</body>
+</html>
