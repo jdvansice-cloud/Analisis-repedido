@@ -388,7 +388,7 @@
         <tr><td>Marca</td><td>Marca del producto</td></tr>
         <tr><td>Proveedor</td><td>C&oacute;digo del proveedor actual</td></tr>
         <tr><td>Descripci&oacute;n</td><td>Nombre del producto</td></tr>
-        <tr><td>&Uacute;lt. Compra</td><td>Fecha de la &uacute;ltima compra (Mes A&ntilde;o)</td></tr>
+        <tr><td>&Uacute;lt. Compra</td><td>Fecha de la &uacute;ltima compra (formato: Mes A&ntilde;o, ej: "Mar 2025"). Usada para el filtro de a&ntilde;os.</td></tr>
         <tr><td>Cant. Comp.</td><td>Cantidad de la &uacute;ltima compra</td></tr>
         <tr><td>CEDI</td><td>Stock en centro de distribuci&oacute;n</td></tr>
         <tr><td>Tiendas</td><td>Stock en tiendas</td></tr>
@@ -448,7 +448,7 @@
         <tr><td><strong>Estado</strong></td><td>Filtra por estado (Cr&iacute;tico, Bajo, Reponer, OK, Sin Ventas)</td></tr>
         <tr><td><strong>Patr&oacute;n</strong></td><td>Filtra por patr&oacute;n de demanda</td></tr>
         <tr><td><strong>ABC</strong></td><td>Filtra por clasificaci&oacute;n ABC (A, B o C)</td></tr>
-        <tr><td><strong>A&ntilde;o</strong></td><td>Filtra por a&ntilde;o de &uacute;ltima compra</td></tr>
+        <tr><td><strong>A&ntilde;os</strong></td><td>Selecci&oacute;n m&uacute;ltiple de a&ntilde;os de &uacute;ltima compra (ver detalle abajo)</td></tr>
         <tr><td><strong>Otros</strong></td><td>Necesita Pedido, No Necesita, Editados, Marcados</td></tr>
     </table>
 
@@ -460,23 +460,50 @@
         <li><strong>Ordenar:</strong> Haga clic en cualquier encabezado de columna para ordenar ascendente/descendente.</li>
     </ul>
 
+    <h3>Filtro de A&ntilde;os (Selecci&oacute;n M&uacute;ltiple)</h3>
+    <p>El bot&oacute;n <strong>"A&ntilde;os"</strong> abre un men&uacute; desplegable con casillas de verificaci&oacute;n para cada a&ntilde;o disponible en los datos (basado en la fecha de &uacute;ltima compra):</p>
+    <ul>
+        <li>Marque uno o m&aacute;s a&ntilde;os para filtrar la tabla. Solo se mostrar&aacute;n art&iacute;culos cuya &uacute;ltima compra corresponda a los a&ntilde;os seleccionados.</li>
+        <li>Use <strong>"Todos"</strong> para seleccionar todos los a&ntilde;os (sin filtro).</li>
+        <li>Use <strong>"Ninguno"</strong> para deseleccionar todos.</li>
+        <li>El bot&oacute;n muestra los a&ntilde;os activos: "A&ntilde;os: Todos", "A&ntilde;os: 2024, 2025", o "A&ntilde;os: 3 sel." si hay muchos.</li>
+    </ul>
+
+    <div class="important">
+        <strong>Importante:</strong> La selecci&oacute;n de a&ntilde;os afecta directamente las exportaciones. Solo los art&iacute;culos de los a&ntilde;os seleccionados se incluir&aacute;n en los archivos CSV y Excel exportados. Esto le permite generar pedidos segmentados por per&iacute;odo de compra.
+    </div>
+
 
     <!-- 14. EXPORTACIÓN -->
     <h2 id="exportar">14. Exportaci&oacute;n de Datos</h2>
 
     <h3>Exportar CSV</h3>
-    <p>Genera un archivo .csv con todos los datos (sin filtrar). Compatible con cualquier hoja de c&aacute;lculo.</p>
+    <p>Genera un archivo .csv compatible con cualquier hoja de c&aacute;lculo.</p>
 
     <h3>Exportar Excel</h3>
     <p>Genera un archivo .xlsx con dos hojas:</p>
     <ul>
-        <li><strong>Pedidos:</strong> Todos los datos detallados con columnas autoajustadas.</li>
-        <li><strong>Resumen:</strong> Resumen ejecutivo con totales, clasificaci&oacute;n ABC-XYZ y patrones de demanda.</li>
+        <li><strong>Pedidos:</strong> Datos detallados con columnas autoajustadas.</li>
+        <li><strong>Resumen:</strong> Resumen ejecutivo con totales, clasificaci&oacute;n ABC-XYZ y patrones de demanda. Si hay a&ntilde;os seleccionados, el resumen se recalcula &uacute;nicamente con los datos filtrados.</li>
     </ul>
-    <p>Ambas exportaciones incluyen tanto la cantidad sugerida como la cantidad editada (si aplica).</p>
+    <p>Ambas exportaciones incluyen tanto la cantidad sugerida original como la cantidad editada (si aplica), junto con una columna "Editado" (Si/No).</p>
+
+    <h3>Filtrado por A&ntilde;os en la Exportaci&oacute;n</h3>
+    <p>Las exportaciones respetan la selecci&oacute;n de a&ntilde;os:</p>
+    <ul>
+        <li><strong>Si "A&ntilde;os: Todos"</strong> &rarr; se exportan todos los art&iacute;culos.</li>
+        <li><strong>Si se seleccionan a&ntilde;os espec&iacute;ficos</strong> &rarr; solo se exportan art&iacute;culos cuya &uacute;ltima compra corresponda a esos a&ntilde;os.</li>
+        <li>El nombre del archivo incluye los a&ntilde;os seleccionados (ej: <code>recomendaciones_pedido_2024-2025.xlsx</code>).</li>
+        <li>El resumen del Excel se recalcula con los datos filtrados (totales, conteos ABC-XYZ, patrones de demanda).</li>
+        <li>Si ning&uacute;n art&iacute;culo coincide con los a&ntilde;os seleccionados, se muestra un mensaje de error.</li>
+    </ul>
 
     <div class="tip">
-        <strong>Tip:</strong> La exportaci&oacute;n siempre incluye <em>todos</em> los art&iacute;culos, independientemente de los filtros activos. Esto asegura que no se pierda informaci&oacute;n.
+        <strong>Tip:</strong> Use el filtro de a&ntilde;os para generar pedidos segmentados. Por ejemplo, seleccione solo el a&ntilde;o actual para exportar &uacute;nicamente art&iacute;culos con compras recientes, o seleccione a&ntilde;os anteriores para revisar art&iacute;culos que no se han reordenado recientemente.
+    </div>
+
+    <div class="warning">
+        <strong>Nota:</strong> Los dem&aacute;s filtros (estado, patr&oacute;n, ABC, b&uacute;squeda) solo afectan la vista en pantalla, no la exportaci&oacute;n. &Uacute;nicamente el filtro de a&ntilde;os determina qu&eacute; art&iacute;culos se incluyen en los archivos exportados.
     </div>
 
 
