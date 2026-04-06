@@ -438,6 +438,9 @@
                             <option value="B">ABC: B</option>
                             <option value="C">ABC: C</option>
                         </select>
+                        <select id="yearFilter" onchange="filterTable()">
+                            <option value="">Todos los A&ntilde;os</option>
+                        </select>
                         <select id="orderFilter" onchange="filterTable()">
                             <option value="">Todos</option>
                             <option value="needs_order">Necesita Pedido</option>
@@ -844,6 +847,17 @@
                 </div>
             `;
 
+            // Populate year filter from purchase dates
+            const years = new Set();
+            data.results.forEach(r => {
+                if (r.fecha_compra_year) years.add(r.fecha_compra_year);
+            });
+            const yearSel = document.getElementById("yearFilter");
+            yearSel.innerHTML = '<option value="">Todos los A\u00f1os</option>';
+            [...years].sort((a, b) => b - a).forEach(y => {
+                yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+            });
+
             buildColToggle();
             currentPage = 1;
             filterTable();
@@ -998,6 +1012,7 @@
             const statusF = document.getElementById("statusFilter").value;
             const demandF = document.getElementById("demandFilter").value;
             const abcF = document.getElementById("abcFilter").value;
+            const yearF = document.getElementById("yearFilter").value;
             const orderF = document.getElementById("orderFilter").value;
 
             if (search) items = items.filter(r =>
@@ -1008,6 +1023,7 @@
             if (statusF) items = items.filter(r => r.status === statusF);
             if (demandF) items = items.filter(r => r.demand_pattern === demandF);
             if (abcF) items = items.filter(r => r.abc === abcF);
+            if (yearF) items = items.filter(r => r.fecha_compra_year === parseInt(yearF));
             if (orderF === "needs_order") items = items.filter(r => getEffectiveQty(r) > 0);
             if (orderF === "no_order") items = items.filter(r => getEffectiveQty(r) === 0);
             if (orderF === "edited") items = items.filter(r => userEdits[r.material] !== undefined);

@@ -299,14 +299,17 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
         order_value = suggested_qty * fob
 
         # Last purchase
+        MESES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
         fecha_compra_raw = row.get("Fe. Comp", "")
+        fecha_compra = "-"
+        fecha_compra_year = None
         if pd.notna(fecha_compra_raw):
             try:
-                fecha_compra = pd.to_datetime(fecha_compra_raw).strftime("%d/%m/%Y")
+                dt = pd.to_datetime(fecha_compra_raw)
+                fecha_compra = f"{MESES_ES[dt.month - 1]} {dt.year}"
+                fecha_compra_year = dt.year
             except Exception:
                 fecha_compra = str(fecha_compra_raw)
-        else:
-            fecha_compra = "-"
         cant_compra = int(row.get("Cant.", 0))
 
         # ABC-XYZ
@@ -319,6 +322,7 @@ def calculate_orders(data, lead_time_months, target_stock_months, service_level,
             "cod_proveedor": str(row.get("Cod. Proveedor Actual", "")),
             "descripcion": str(row.get("Descripcion", "")),
             "fecha_compra": fecha_compra,
+            "fecha_compra_year": fecha_compra_year,
             "cant_compra": cant_compra,
             "abc": abc_class,
             "xyz": xyz_class,
