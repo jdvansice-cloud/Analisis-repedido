@@ -233,6 +233,18 @@
         .preset-bar label { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
         .preset-bar select { padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; background: var(--card); color: var(--text); }
 
+        /* Year multi-select */
+        .year-filter-wrapper { position: relative; display: inline-block; }
+        .year-filter-btn { min-width: 110px; text-align: left; }
+        .year-filter-dropdown { display: none; position: absolute; left: 0; top: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-md); z-index: 100; padding: 0.5rem; min-width: 160px; }
+        .year-filter-dropdown.open { display: block; }
+        .year-filter-dropdown label { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; font-size: 0.82rem; cursor: pointer; border-radius: 4px; color: var(--text); }
+        .year-filter-dropdown label:hover { background: var(--hover-bg); }
+        .year-filter-dropdown input { accent-color: var(--primary); }
+        .year-filter-dropdown .year-actions { display: flex; gap: 0.4rem; padding: 0.4rem 0.5rem 0.2rem; border-top: 1px solid var(--border); margin-top: 0.3rem; }
+        .year-filter-dropdown .year-actions button { font-size: 0.72rem; padding: 0.2rem 0.5rem; border: none; background: none; color: var(--primary); cursor: pointer; font-weight: 600; }
+        .year-filter-dropdown .year-actions button:hover { text-decoration: underline; }
+
         /* Column toggle dropdown */
         .col-toggle-wrapper { position: relative; display: inline-block; }
         .col-toggle-btn { cursor: pointer; }
@@ -449,9 +461,10 @@
                             <option value="B">ABC: B</option>
                             <option value="C">ABC: C</option>
                         </select>
-                        <select id="yearFilter" onchange="filterTable()">
-                            <option value="">Todos los A&ntilde;os</option>
-                        </select>
+                        <div class="year-filter-wrapper" id="yearFilterWrapper">
+                            <button class="btn btn-sm btn-secondary year-filter-btn" onclick="toggleYearDropdown()" id="yearFilterBtn">A&ntilde;os: Todos</button>
+                            <div class="year-filter-dropdown" id="yearDropdown"></div>
+                        </div>
                         <select id="orderFilter" onchange="filterTable()">
                             <option value="">Todos</option>
                             <option value="needs_order">Necesita Pedido</option>
@@ -505,6 +518,8 @@
         let hiddenCols = new Set();
         let filterTimeout = null;
         let markedRows = new Set();
+        let selectedYears = new Set(); // empty = all years
+        let availableYears = [];
 
         const MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
         const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -859,15 +874,13 @@
             `;
 
             // Populate year filter from purchase dates
-            const years = new Set();
+            const yearsSet = new Set();
             data.results.forEach(r => {
-                if (r.fecha_compra_year) years.add(r.fecha_compra_year);
+                if (r.fecha_compra_year) yearsSet.add(r.fecha_compra_year);
             });
-            const yearSel = document.getElementById("yearFilter");
-            yearSel.innerHTML = '<option value="">Todos los A\u00f1os</option>';
-            [...years].sort((a, b) => b - a).forEach(y => {
-                yearSel.innerHTML += `<option value="${y}">${y}</option>`;
-            });
+            availableYears = [...yearsSet].sort((a, b) => b - a);
+            selectedYears = new Set(); // reset to all
+            buildYearDropdown();
 
             buildColToggle();
             currentPage = 1;
@@ -948,6 +961,63 @@
             dd.appendChild(mlbl);
         }
 
+        // ─── Year Multi-Select ───
+        function buildYearDropdown() {
+            const dd = document.getElementById("yearDropdown");
+            dd.innerHTML = "";
+            availableYears.forEach(y => {
+                const lbl = document.createElement("label");
+                const chk = document.createElement("input");
+                chk.type = "checkbox";
+                chk.checked = selectedYears.size === 0 || selectedYears.has(y);
+                chk.onchange = () => {
+                    if (chk.checked) {
+                        selectedYears.add(y);
+                    } else {
+                        selectedYears.delete(y);
+                    }
+                    // If all are checked or none, treat as "all"
+                    if (selectedYears.size === availableYears.length) selectedYears.clear();
+                    updateYearBtnLabel();
+                    filterTable();
+                };
+                lbl.appendChild(chk);
+                lbl.appendChild(document.createTextNode(" " + y));
+                dd.appendChild(lbl);
+            });
+            // Actions row
+            const actions = document.createElement("div");
+            actions.className = "year-actions";
+            const selAll = document.createElement("button");
+            selAll.textContent = "Todos";
+            selAll.onclick = () => { selectedYears.clear(); buildYearDropdown(); updateYearBtnLabel(); filterTable(); };
+            const selNone = document.createElement("button");
+            selNone.textContent = "Ninguno";
+            selNone.onclick = () => { selectedYears.clear(); availableYears.forEach(y => selectedYears.add(y)); selectedYears.clear(); buildYearDropdown(); updateYearBtnLabel(); filterTable(); };
+            actions.appendChild(selAll);
+            actions.appendChild(selNone);
+            dd.appendChild(actions);
+            updateYearBtnLabel();
+        }
+        function updateYearBtnLabel() {
+            const btn = document.getElementById("yearFilterBtn");
+            if (selectedYears.size === 0) {
+                btn.textContent = "A\u00f1os: Todos";
+            } else if (selectedYears.size <= 2) {
+                btn.textContent = "A\u00f1os: " + [...selectedYears].sort((a,b) => b-a).join(", ");
+            } else {
+                btn.textContent = "A\u00f1os: " + selectedYears.size + " sel.";
+            }
+        }
+        function toggleYearDropdown() {
+            document.getElementById("yearDropdown").classList.toggle("open");
+        }
+        document.addEventListener("click", e => {
+            if (!e.target.closest(".year-filter-wrapper")) {
+                document.getElementById("yearDropdown").classList.remove("open");
+            }
+        });
+
         function toggleColDropdown() {
             document.getElementById("colDropdown").classList.toggle("open");
         }
@@ -1024,7 +1094,6 @@
             const statusF = document.getElementById("statusFilter").value;
             const demandF = document.getElementById("demandFilter").value;
             const abcF = document.getElementById("abcFilter").value;
-            const yearF = document.getElementById("yearFilter").value;
             const orderF = document.getElementById("orderFilter").value;
 
             if (search) items = items.filter(r =>
@@ -1035,7 +1104,7 @@
             if (statusF) items = items.filter(r => r.status === statusF);
             if (demandF) items = items.filter(r => r.demand_pattern === demandF);
             if (abcF) items = items.filter(r => r.abc === abcF);
-            if (yearF) items = items.filter(r => r.fecha_compra_year === parseInt(yearF));
+            if (selectedYears.size > 0) items = items.filter(r => selectedYears.has(r.fecha_compra_year));
             if (orderF === "needs_order") items = items.filter(r => getEffectiveQty(r) > 0);
             if (orderF === "no_order") items = items.filter(r => getEffectiveQty(r) === 0);
             if (orderF === "edited") items = items.filter(r => userEdits[r.material] !== undefined);
@@ -1202,8 +1271,22 @@
         }
 
         // ─── Export CSV ───
+        function getExportResults() {
+            if (!currentData) return [];
+            let results = currentData.results;
+            if (selectedYears.size > 0) {
+                results = results.filter(r => selectedYears.has(r.fecha_compra_year));
+            }
+            return results;
+        }
+
         function exportCSV() {
             if (!currentData) return;
+            const exportResults = getExportResults();
+            if (exportResults.length === 0) {
+                showToast("No hay datos para exportar con los a\u00f1os seleccionados", "error");
+                return;
+            }
             const headers = [];
             baseCols.forEach(c => headers.push(c.label));
             for (let i = 11; i >= 0; i--) headers.push("Vta M" + String(i+1).padStart(2,'0'));
@@ -1216,7 +1299,7 @@
                     headers.push(c.label);
                 }
             });
-            const rows = currentData.results.map(r => {
+            const rows = exportResults.map(r => {
                 const row = [];
                 baseCols.forEach(c => {
                     let v = r[c.key];
@@ -1240,21 +1323,28 @@
                 });
                 return row;
             });
+            const yearLabel = selectedYears.size > 0 ? "_" + [...selectedYears].sort().join("-") : "";
             let csv = "\uFEFF" + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "recomendaciones_pedido.csv";
+            a.download = `recomendaciones_pedido${yearLabel}.csv`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast("CSV exportado exitosamente", "success");
+            const yearMsg = selectedYears.size > 0 ? ` (${[...selectedYears].sort().join(", ")})` : "";
+            showToast(`CSV exportado: ${exportResults.length} art\u00edculos${yearMsg}`, "success");
         }
 
         // ─── Export XLSX ───
         function exportXLSX() {
             if (!currentData || typeof XLSX === "undefined") {
                 showToast("Error: librer\u00eda de Excel no disponible", "error");
+                return;
+            }
+            const exportResults = getExportResults();
+            if (exportResults.length === 0) {
+                showToast("No hay datos para exportar con los a\u00f1os seleccionados", "error");
                 return;
             }
             const headers = [];
@@ -1271,7 +1361,7 @@
             });
 
             const wsData = [headers];
-            currentData.results.forEach(r => {
+            exportResults.forEach(r => {
                 const row = [];
                 baseCols.forEach(c => row.push(r[c.key] !== undefined ? r[c.key] : ""));
                 const allSales = r.monthly_sales_all || r.monthly_sales || [];
@@ -1306,34 +1396,55 @@
 
             XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
 
-            // Summary sheet
+            // Summary sheet (recalculate from exported data)
+            const expItemsToOrder = exportResults.filter(r => getEffectiveQty(r) > 0).length;
+            const expTotalUnits = exportResults.reduce((s, r) => s + getEffectiveQty(r), 0);
+            const expTotalValue = exportResults.reduce((s, r) => s + getEffectiveValue(r), 0);
+            const expCritical = exportResults.filter(r => r.status === "Cr\u00edtico").length;
+            const expLow = exportResults.filter(r => r.status === "Bajo").length;
+            const expNoSales = exportResults.filter(r => r.status === "Sin Ventas").length;
+
+            const expAbcCounts = {};
+            const expDemandCounts = {};
+            exportResults.forEach(r => {
+                expAbcCounts[r.abc_xyz] = (expAbcCounts[r.abc_xyz] || 0) + 1;
+                expDemandCounts[r.demand_pattern] = (expDemandCounts[r.demand_pattern] || 0) + 1;
+            });
+
+            const yearLabel = selectedYears.size > 0 ? " (" + [...selectedYears].sort().join(", ") + ")" : "";
             const summaryData = [
-                ["Resumen de Pedido"],
+                ["Resumen de Pedido" + yearLabel],
                 [],
-                ["Total SKUs", currentData.summary.total_items],
-                ["Art\u00edculos a Pedir", currentData.summary.items_to_order],
-                ["Unidades Totales", currentData.summary.total_units],
-                ["Valor Total FOB", currentData.summary.total_order_value_fob],
-                ["Items Cr\u00edticos", currentData.summary.critical_items],
-                ["Items Stock Bajo", currentData.summary.low_items],
-                ["Sin Ventas", currentData.summary.no_sales_items],
-                [],
-                ["Clasificaci\u00f3n ABC-XYZ"],
+                ["Total SKUs", exportResults.length],
+                ["Art\u00edculos a Pedir", expItemsToOrder],
+                ["Unidades Totales", expTotalUnits],
+                ["Valor Total FOB", Math.round(expTotalValue * 100) / 100],
+                ["Items Cr\u00edticos", expCritical],
+                ["Items Stock Bajo", expLow],
+                ["Sin Ventas", expNoSales],
             ];
-            Object.entries(currentData.summary.abc_xyz_counts).sort().forEach(([k,v]) => {
+            if (selectedYears.size > 0) {
+                summaryData.push([]);
+                summaryData.push(["A\u00f1os Seleccionados", [...selectedYears].sort().join(", ")]);
+            }
+            summaryData.push([]);
+            summaryData.push(["Clasificaci\u00f3n ABC-XYZ"]);
+            Object.entries(expAbcCounts).sort().forEach(([k,v]) => {
                 summaryData.push([k, v]);
             });
             summaryData.push([]);
             summaryData.push(["Patrones de Demanda"]);
-            Object.entries(currentData.summary.demand_pattern_counts).forEach(([k,v]) => {
+            Object.entries(expDemandCounts).forEach(([k,v]) => {
                 summaryData.push([k, v]);
             });
 
             const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
 
-            XLSX.writeFile(wb, "recomendaciones_pedido.xlsx");
-            showToast("Excel exportado exitosamente", "success");
+            const fileYearLabel = selectedYears.size > 0 ? "_" + [...selectedYears].sort().join("-") : "";
+            XLSX.writeFile(wb, `recomendaciones_pedido${fileYearLabel}.xlsx`);
+            const yearMsg = selectedYears.size > 0 ? ` (${[...selectedYears].sort().join(", ")})` : "";
+            showToast(`Excel exportado: ${exportResults.length} art\u00edculos${yearMsg}`, "success");
         }
     </script>
 </body>
