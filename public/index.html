@@ -277,6 +277,33 @@
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+        /* Session save/load modal */
+        .session-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; }
+        .session-overlay.open { display: flex; }
+        .session-modal { background: var(--card); border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow-md); width: 90%; max-width: 520px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+        .session-modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .session-modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .session-modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); padding: 0.2rem; line-height: 1; }
+        .session-modal-close:hover { color: var(--text); }
+        .session-modal-body { padding: 1rem 1.25rem; overflow-y: auto; flex: 1; }
+        .session-list { list-style: none; }
+        .session-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.15s; }
+        .session-item:hover { border-color: var(--primary); background: rgba(37,99,235,0.04); }
+        .session-item-info { flex: 1; min-width: 0; }
+        .session-item-name { font-weight: 600; font-size: 0.9rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .session-item-meta { font-size: 0.75rem; color: var(--muted); }
+        .session-item-delete { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; padding: 0.3rem; border-radius: 4px; opacity: 0.6; }
+        .session-item-delete:hover { opacity: 1; background: rgba(220,38,38,0.08); }
+        .session-empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.9rem; }
+        .autosave-banner { display: none; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.88rem; color: var(--primary); align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        .autosave-banner.active { display: flex; }
+        .autosave-banner .autosave-info { flex: 1; }
+        .autosave-banner .autosave-info strong { font-weight: 700; }
+        .btn-outline-primary { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+        .btn-outline-primary:hover { background: rgba(37,99,235,0.08); }
+        .btn-outline-danger { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); }
+        .btn-outline-danger:hover { background: rgba(220,38,38,0.08); }
+
         /* Print styles */
         @media print {
             .header, .upload-zone, .actions, .filter-bar, .edit-banner, .month-exclusion,
@@ -301,6 +328,17 @@
 </head>
 <body>
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Session load modal -->
+    <div class="session-overlay" id="sessionOverlay" onclick="if(event.target===this)closeSessionModal()">
+        <div class="session-modal">
+            <div class="session-modal-header">
+                <h3 id="sessionModalTitle">Sesiones Guardadas</h3>
+                <button class="session-modal-close" onclick="closeSessionModal()">&times;</button>
+            </div>
+            <div class="session-modal-body" id="sessionModalBody"></div>
+        </div>
+    </div>
 
     <div class="header">
         <div class="header-left">
@@ -386,11 +424,20 @@
                 <div class="month-chips" id="monthChips"></div>
             </div>
 
+            <div class="autosave-banner" id="autosaveBanner">
+                <div class="autosave-info">Se encontr&oacute; una sesi&oacute;n sin guardar: <strong id="autosaveName"></strong> (<span id="autosaveDate"></span>)</div>
+                <button class="btn btn-sm btn-outline-primary" onclick="restoreAutosave()">Restaurar</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="dismissAutosave()">Descartar</button>
+            </div>
+
             <div class="actions">
                 <button class="btn btn-primary" id="calcBtn" disabled onclick="calculate()">Calcular Pedidos</button>
                 <button class="btn btn-secondary" id="exportCsvBtn" style="display:none" onclick="exportCSV()">Exportar CSV</button>
                 <button class="btn btn-success" id="exportXlsxBtn" style="display:none" onclick="exportXLSX()">Exportar Excel</button>
                 <button class="btn btn-warning" id="resetBtn" style="display:none" onclick="resetEdits()">Restaurar Cantidades</button>
+                <span style="border-left:1px solid var(--border);height:24px;margin:0 0.25rem" id="sessionDivider" style="display:none"></span>
+                <button class="btn btn-secondary" id="saveSessionBtn" style="display:none" onclick="saveSession()">&#128190; Guardar Sesi&oacute;n</button>
+                <button class="btn btn-secondary" onclick="openSessionModal()">&#128193; Sesiones</button>
             </div>
 
             <div class="preset-bar">
@@ -1470,6 +1517,228 @@
             const yearMsg = selectedYears.size > 0 ? ` (${[...selectedYears].sort().join(", ")})` : "";
             showToast(`Excel exportado: ${exportResults.length} art\u00edculos${yearMsg}`, "success");
         }
+
+        // ─── Session Save / Load / Autosave ───
+        const SESSIONS_KEY = "savedSessions";
+        const AUTOSAVE_KEY = "autoSaveSession";
+        let autosaveTimeout = null;
+        let sessionFileName = "";
+
+        function getSessionState() {
+            return {
+                currentData: currentData,
+                userEdits: userEdits,
+                markedRows: [...markedRows],
+                selectedYears: [...selectedYears],
+                availableYears: availableYears,
+                excludedMonths: [...excludedMonths],
+                hiddenCols: [...hiddenCols],
+                params: {
+                    leadTime: document.getElementById("leadTime").value,
+                    targetStock: document.getElementById("targetStock").value,
+                    serviceLevel: document.getElementById("serviceLevel").value,
+                    salesMonths: document.getElementById("salesMonths").value,
+                    minOrder: document.getElementById("minOrder").value,
+                    rounding: document.getElementById("rounding").value,
+                },
+                fileName: sessionFileName || (currentFile ? currentFile.name : "Sin nombre"),
+            };
+        }
+
+        function restoreSessionState(state) {
+            // Restore params
+            if (state.params) {
+                document.getElementById("leadTime").value = state.params.leadTime;
+                document.getElementById("targetStock").value = state.params.targetStock;
+                document.getElementById("serviceLevel").value = state.params.serviceLevel;
+                document.getElementById("salesMonths").value = state.params.salesMonths;
+                document.getElementById("minOrder").value = state.params.minOrder;
+                document.getElementById("rounding").value = state.params.rounding;
+            }
+            // Restore excluded months
+            excludedMonths = new Set(state.excludedMonths || []);
+            buildMonthChips();
+            // Restore hidden cols
+            hiddenCols = new Set(state.hiddenCols || []);
+            // Restore data
+            currentData = state.currentData;
+            userEdits = state.userEdits || {};
+            markedRows = new Set(state.markedRows || []);
+            availableYears = state.availableYears || [];
+            selectedYears = new Set(state.selectedYears || []);
+            sessionFileName = state.fileName || "";
+            // Render
+            if (currentData) {
+                document.getElementById("fileName").textContent = state.fileName || "Sesi\u00f3n restaurada";
+                document.getElementById("fileSize").textContent = "";
+                document.getElementById("calcBtn").disabled = true;
+                updateEditBanner();
+                renderResults(currentData);
+                // Re-apply year selection after renderResults rebuilds dropdown
+                selectedYears = new Set(state.selectedYears || []);
+                buildYearDropdown();
+                filterTable();
+                updateSummaryTotals();
+            }
+        }
+
+        // Save session
+        function saveSession() {
+            if (!currentData) { showToast("No hay datos para guardar", "error"); return; }
+            const defaultName = sessionFileName || (currentFile ? currentFile.name : "Sesi\u00f3n");
+            const name = prompt("Nombre de la sesi\u00f3n:", defaultName + " - " + new Date().toLocaleDateString("es"));
+            if (!name) return;
+            const sessions = getSavedSessions();
+            sessions[name] = {
+                state: getSessionState(),
+                savedAt: new Date().toISOString(),
+                itemCount: currentData.results.length,
+                editCount: Object.keys(userEdits).length,
+            };
+            try {
+                localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+                showToast("Sesi\u00f3n guardada: " + name, "success");
+            } catch (e) {
+                if (e.name === "QuotaExceededError") {
+                    showToast("Error: almacenamiento lleno. Elimine sesiones antiguas.", "error");
+                } else {
+                    showToast("Error al guardar: " + e.message, "error");
+                }
+            }
+        }
+
+        function getSavedSessions() {
+            try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || "{}"); } catch { return {}; }
+        }
+
+        function deleteSession(name) {
+            const sessions = getSavedSessions();
+            delete sessions[name];
+            localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+            openSessionModal(); // refresh list
+            showToast("Sesi\u00f3n eliminada", "info");
+        }
+
+        function loadSession(name) {
+            const sessions = getSavedSessions();
+            const session = sessions[name];
+            if (!session) return;
+            restoreSessionState(session.state);
+            closeSessionModal();
+            showToast("Sesi\u00f3n restaurada: " + name, "success");
+        }
+
+        // Session modal
+        function openSessionModal() {
+            const sessions = getSavedSessions();
+            const keys = Object.keys(sessions).sort((a, b) => {
+                return new Date(sessions[b].savedAt) - new Date(sessions[a].savedAt);
+            });
+            const body = document.getElementById("sessionModalBody");
+
+            if (keys.length === 0) {
+                body.innerHTML = '<div class="session-empty">No hay sesiones guardadas.<br>Use "Guardar Sesi\u00f3n" despu\u00e9s de calcular un pedido.</div>';
+            } else {
+                let html = '<ul class="session-list">';
+                keys.forEach(name => {
+                    const s = sessions[name];
+                    const date = new Date(s.savedAt);
+                    const dateStr = date.toLocaleDateString("es", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                    const edits = s.editCount > 0 ? `, ${s.editCount} editados` : "";
+                    const nameEsc = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    html += `<li class="session-item" onclick="loadSession('${nameEsc}')">
+                        <div class="session-item-info">
+                            <div class="session-item-name">${name}</div>
+                            <div class="session-item-meta">${dateStr} &mdash; ${s.itemCount} SKUs${edits}</div>
+                        </div>
+                        <button class="session-item-delete" onclick="event.stopPropagation();deleteSession('${nameEsc}')" title="Eliminar">&times;</button>
+                    </li>`;
+                });
+                html += '</ul>';
+                body.innerHTML = html;
+            }
+            document.getElementById("sessionOverlay").classList.add("open");
+        }
+
+        function closeSessionModal() {
+            document.getElementById("sessionOverlay").classList.remove("open");
+        }
+
+        // Auto-save (debounced, triggers on edits/marks)
+        function triggerAutosave() {
+            if (!currentData) return;
+            clearTimeout(autosaveTimeout);
+            autosaveTimeout = setTimeout(() => {
+                try {
+                    const data = {
+                        state: getSessionState(),
+                        savedAt: new Date().toISOString(),
+                        itemCount: currentData.results.length,
+                    };
+                    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+                } catch (e) { /* silently fail */ }
+            }, 2000);
+        }
+
+        // Hook autosave into edit and mark functions
+        const _origOnOrderQtyChange = onOrderQtyChange;
+        onOrderQtyChange = function(material, inputEl) {
+            _origOnOrderQtyChange(material, inputEl);
+            triggerAutosave();
+        };
+        const _origToggleMark = toggleMark;
+        toggleMark = function(material) {
+            _origToggleMark(material);
+            triggerAutosave();
+        };
+
+        function restoreAutosave() {
+            try {
+                const data = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
+                if (data && data.state) {
+                    restoreSessionState(data.state);
+                    localStorage.removeItem(AUTOSAVE_KEY);
+                    document.getElementById("autosaveBanner").classList.remove("active");
+                    showToast("Sesi\u00f3n restaurada desde autoguardado", "success");
+                }
+            } catch (e) {
+                showToast("Error al restaurar: " + e.message, "error");
+            }
+        }
+
+        function dismissAutosave() {
+            localStorage.removeItem(AUTOSAVE_KEY);
+            document.getElementById("autosaveBanner").classList.remove("active");
+        }
+
+        // Check for autosave on page load
+        function checkAutosave() {
+            try {
+                const raw = localStorage.getItem(AUTOSAVE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data && data.state && data.state.currentData) {
+                    const date = new Date(data.savedAt);
+                    const dateStr = date.toLocaleDateString("es", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+                    document.getElementById("autosaveName").textContent = data.state.fileName || "Sin nombre";
+                    document.getElementById("autosaveDate").textContent = dateStr + " - " + data.itemCount + " SKUs";
+                    document.getElementById("autosaveBanner").classList.add("active");
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Show save button when data is loaded
+        const _origRenderResults = renderResults;
+        renderResults = function(data) {
+            _origRenderResults(data);
+            document.getElementById("saveSessionBtn").style.display = "inline-flex";
+            document.getElementById("sessionDivider").style.display = "";
+            // Store filename for session
+            if (currentFile) sessionFileName = currentFile.name;
+        };
+
+        // Init: check for autosave
+        checkAutosave();
     </script>
 </body>
 </html>

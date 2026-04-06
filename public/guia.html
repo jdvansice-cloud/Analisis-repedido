@@ -108,6 +108,7 @@
             <li><a href="#columnas">Referencia de Columnas</a></li>
             <li><a href="#edicion">Edici&oacute;n Manual de Cantidades</a></li>
             <li><a href="#marcado">Marcado de Filas</a></li>
+            <li><a href="#sesiones">Guardar y Retomar Sesiones</a></li>
             <li><a href="#filtros">Filtros y B&uacute;squeda</a></li>
             <li><a href="#exportar">Exportaci&oacute;n de Datos</a></li>
             <li><a href="#tips">Consejos y Mejores Pr&aacute;cticas</a></li>
@@ -878,7 +879,56 @@
 
 
     <!-- 13. FILTROS -->
-    <h2 id="filtros">12. Filtros y B&uacute;squeda</h2>
+    <!-- 12. SESIONES -->
+    <h2 id="sesiones">12. Guardar y Retomar Sesiones</h2>
+
+    <p>Si no puede completar la revisi&oacute;n del pedido en una sola sesi&oacute;n, puede guardar todo su trabajo y retomarlo despu&eacute;s sin perder cambios.</p>
+
+    <h3>Guardar una Sesi&oacute;n</h3>
+    <ol>
+        <li>Despu&eacute;s de calcular y hacer sus ajustes, haga clic en <strong>"Guardar Sesi&oacute;n"</strong>.</li>
+        <li>Ingrese un nombre descriptivo (ej: "Pedido China - Marzo 2025").</li>
+        <li>Se guardar&aacute; en su navegador: datos completos, cantidades editadas, filas marcadas, filtros y par&aacute;metros.</li>
+    </ol>
+
+    <h3>Cargar una Sesi&oacute;n</h3>
+    <ol>
+        <li>Haga clic en <strong>"Sesiones"</strong> (disponible siempre, incluso sin datos cargados).</li>
+        <li>Ver&aacute; la lista de sesiones guardadas con nombre, fecha, cantidad de SKUs y ediciones.</li>
+        <li>Haga clic en una sesi&oacute;n para restaurarla completamente.</li>
+        <li>Use el bot&oacute;n &times; para eliminar sesiones que ya no necesite.</li>
+    </ol>
+
+    <h3>Autoguardado</h3>
+    <p>El sistema guarda autom&aacute;ticamente su trabajo cada vez que edita una cantidad o marca una fila. Si cierra el navegador accidentalmente:</p>
+    <ul>
+        <li>Al volver a abrir la p&aacute;gina, ver&aacute; un banner azul ofreciendo restaurar la sesi&oacute;n.</li>
+        <li>Haga clic en <strong>"Restaurar"</strong> para recuperar su trabajo.</li>
+        <li>Haga clic en <strong>"Descartar"</strong> si desea empezar de nuevo.</li>
+    </ul>
+
+    <div class="tip">
+        <strong>Tip:</strong> Las sesiones se guardan en el almacenamiento local de su navegador. Si cambia de navegador o dispositivo, las sesiones no estar&aacute;n disponibles. Para transferir datos entre dispositivos, use la exportaci&oacute;n a Excel.
+    </div>
+
+    <div class="warning">
+        <strong>Nota:</strong> El almacenamiento local tiene un l&iacute;mite de aproximadamente 5 MB. Si trabaja con archivos muy grandes (miles de SKUs), es posible que solo pueda mantener 2-3 sesiones guardadas simult&aacute;neamente. Elimine sesiones antiguas para liberar espacio.
+    </div>
+
+    <h3>&iquest;Qu&eacute; se guarda?</h3>
+    <table>
+        <tr><th>Elemento</th><th>Descripci&oacute;n</th></tr>
+        <tr><td>Datos completos</td><td>Todos los resultados del an&aacute;lisis (no necesita el archivo Excel original)</td></tr>
+        <tr><td>Cantidades editadas</td><td>Todas las modificaciones manuales a cantidades de pedido</td></tr>
+        <tr><td>Filas marcadas</td><td>Art&iacute;culos marcados con color p&uacute;rpura</td></tr>
+        <tr><td>Par&aacute;metros</td><td>Tiempo de entrega, stock objetivo, nivel de servicio, etc.</td></tr>
+        <tr><td>Meses excluidos</td><td>Configuraci&oacute;n de meses excluidos del an&aacute;lisis</td></tr>
+        <tr><td>A&ntilde;os seleccionados</td><td>Filtro de a&ntilde;os activo</td></tr>
+        <tr><td>Columnas ocultas</td><td>Configuraci&oacute;n de visibilidad de columnas</td></tr>
+    </table>
+
+
+    <h2 id="filtros">13. Filtros y B&uacute;squeda</h2>
 
     <p>La barra de filtros permite refinar la vista de resultados:</p>
     <table>
@@ -914,7 +964,7 @@
 
 
     <!-- 14. EXPORTACIÓN -->
-    <h2 id="exportar">13. Exportaci&oacute;n de Datos</h2>
+    <h2 id="exportar">14. Exportaci&oacute;n de Datos</h2>
 
     <h3>Exportar CSV</h3>
     <p>Genera un archivo .csv compatible con cualquier hoja de c&aacute;lculo.</p>
@@ -947,7 +997,7 @@
 
 
     <!-- 15. CONSEJOS -->
-    <h2 id="tips">14. Consejos y Mejores Pr&aacute;cticas</h2>
+    <h2 id="tips">15. Consejos y Mejores Pr&aacute;cticas</h2>
 
     <div class="card">
         <div class="card-title">Flujo de Trabajo Recomendado</div>
