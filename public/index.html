@@ -518,7 +518,7 @@
         let hiddenCols = new Set();
         let filterTimeout = null;
         let markedRows = new Set();
-        let selectedYears = new Set(); // empty = all years
+        let selectedYears = new Set(); // contains explicitly selected years
         let availableYears = [];
 
         const MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
@@ -879,7 +879,11 @@
                 if (r.fecha_compra_year) yearsSet.add(r.fecha_compra_year);
             });
             availableYears = [...yearsSet].sort((a, b) => b - a);
-            selectedYears = new Set(); // reset to all
+            // Default to most recent year only
+            selectedYears = new Set();
+            if (availableYears.length > 0) {
+                selectedYears.add(availableYears[0]);
+            }
             buildYearDropdown();
 
             buildColToggle();
@@ -965,19 +969,18 @@
         function buildYearDropdown() {
             const dd = document.getElementById("yearDropdown");
             dd.innerHTML = "";
+            const allSelected = selectedYears.size === availableYears.length;
             availableYears.forEach(y => {
                 const lbl = document.createElement("label");
                 const chk = document.createElement("input");
                 chk.type = "checkbox";
-                chk.checked = selectedYears.size === 0 || selectedYears.has(y);
+                chk.checked = selectedYears.has(y);
                 chk.onchange = () => {
                     if (chk.checked) {
                         selectedYears.add(y);
                     } else {
                         selectedYears.delete(y);
                     }
-                    // If all are checked or none, treat as "all"
-                    if (selectedYears.size === availableYears.length) selectedYears.clear();
                     updateYearBtnLabel();
                     filterTable();
                 };
@@ -990,10 +993,20 @@
             actions.className = "year-actions";
             const selAll = document.createElement("button");
             selAll.textContent = "Todos";
-            selAll.onclick = () => { selectedYears.clear(); buildYearDropdown(); updateYearBtnLabel(); filterTable(); };
+            selAll.onclick = () => {
+                selectedYears = new Set(availableYears);
+                buildYearDropdown();
+                updateYearBtnLabel();
+                filterTable();
+            };
             const selNone = document.createElement("button");
             selNone.textContent = "Ninguno";
-            selNone.onclick = () => { selectedYears.clear(); availableYears.forEach(y => selectedYears.add(y)); selectedYears.clear(); buildYearDropdown(); updateYearBtnLabel(); filterTable(); };
+            selNone.onclick = () => {
+                selectedYears.clear();
+                buildYearDropdown();
+                updateYearBtnLabel();
+                filterTable();
+            };
             actions.appendChild(selAll);
             actions.appendChild(selNone);
             dd.appendChild(actions);
@@ -1002,6 +1015,8 @@
         function updateYearBtnLabel() {
             const btn = document.getElementById("yearFilterBtn");
             if (selectedYears.size === 0) {
+                btn.textContent = "A\u00f1os: Ninguno";
+            } else if (selectedYears.size === availableYears.length) {
                 btn.textContent = "A\u00f1os: Todos";
             } else if (selectedYears.size <= 2) {
                 btn.textContent = "A\u00f1os: " + [...selectedYears].sort((a,b) => b-a).join(", ");
@@ -1104,7 +1119,13 @@
             if (statusF) items = items.filter(r => r.status === statusF);
             if (demandF) items = items.filter(r => r.demand_pattern === demandF);
             if (abcF) items = items.filter(r => r.abc === abcF);
-            if (selectedYears.size > 0) items = items.filter(r => selectedYears.has(r.fecha_compra_year));
+            // Year filter: if years are selected, only show matching items
+            // When all years are selected, show everything (including items with no date)
+            if (selectedYears.size > 0 && selectedYears.size < availableYears.length) {
+                items = items.filter(r => selectedYears.has(r.fecha_compra_year));
+            } else if (selectedYears.size === 0) {
+                items = []; // nothing selected = nothing shown
+            }
             if (orderF === "needs_order") items = items.filter(r => getEffectiveQty(r) > 0);
             if (orderF === "no_order") items = items.filter(r => getEffectiveQty(r) === 0);
             if (orderF === "edited") items = items.filter(r => userEdits[r.material] !== undefined);
@@ -1274,9 +1295,12 @@
         function getExportResults() {
             if (!currentData) return [];
             let results = currentData.results;
-            if (selectedYears.size > 0) {
+            if (selectedYears.size === 0) {
+                return []; // nothing selected
+            } else if (selectedYears.size < availableYears.length) {
                 results = results.filter(r => selectedYears.has(r.fecha_compra_year));
             }
+            // when all years selected, export everything
             return results;
         }
 
