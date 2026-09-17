@@ -146,6 +146,13 @@
         [data-theme="dark"] .badge-demand.erratica { background: rgba(245,158,11,0.15); }
         [data-theme="dark"] .badge-demand.intermitente { background: rgba(37,99,235,0.15); }
         [data-theme="dark"] .badge-demand.irregular { background: rgba(220,38,38,0.15); }
+        .badge-vel { font-size: 0.66rem; background: #f1f5f9; color: var(--text-light); }
+        .badge-vel.rapido { background: #ecfdf5; color: #059669; }
+        .badge-vel.medio { background: #eff6ff; color: #2563eb; }
+        .badge-vel.lento { background: #fff7ed; color: #ea580c; }
+        [data-theme="dark"] .badge-vel.rapido { background: rgba(5,150,105,0.15); }
+        [data-theme="dark"] .badge-vel.medio { background: rgba(37,99,235,0.15); }
+        [data-theme="dark"] .badge-vel.lento { background: rgba(234,88,12,0.15); }
 
         .highlight-row { background: rgba(220,38,38,0.04) !important; }
         [data-theme="dark"] .highlight-row { background: rgba(220,38,38,0.08) !important; }
@@ -380,7 +387,7 @@
                 </div>
                 <div class="param-group">
                     <label for="targetStock">Stock Objetivo (meses)</label>
-                    <input type="number" id="targetStock" value="3" min="1" max="24" step="0.5">
+                    <input type="number" id="targetStock" value="6" min="1" max="24" step="0.5">
                     <div class="param-hint">Cobertura deseada despu&eacute;s de recibir</div>
                 </div>
                 <div class="param-group">
@@ -401,9 +408,9 @@
                     <select id="salesMonths">
                         <option value="1">&Uacute;ltimo 1 mes</option>
                         <option value="2">&Uacute;ltimos 2 meses</option>
-                        <option value="3" selected>&Uacute;ltimos 3 meses</option>
+                        <option value="3">&Uacute;ltimos 3 meses</option>
                         <option value="6">&Uacute;ltimos 6 meses</option>
-                        <option value="12">&Uacute;ltimos 12 meses</option>
+                        <option value="12" selected>&Uacute;ltimos 12 meses</option>
                     </select>
                     <div class="param-hint">Per&iacute;odo para promedio m&oacute;vil</div>
                 </div>
@@ -416,6 +423,16 @@
                     <label for="rounding">Redondear a M&uacute;ltiplo</label>
                     <input type="number" id="rounding" value="1" min="1" max="100">
                     <div class="param-hint">Redondear hacia arriba al m&uacute;ltiplo de X</div>
+                </div>
+                <div class="param-group">
+                    <label for="targetFast">Objetivo art. R&aacute;pidos (meses)</label>
+                    <input type="number" id="targetFast" placeholder="= objetivo" min="0.5" max="24" step="0.5">
+                    <div class="param-hint">Cobertura para los SKUs de rotaci&oacute;n r&aacute;pida. Vac&iacute;o = Stock Objetivo</div>
+                </div>
+                <div class="param-group">
+                    <label for="targetSlow">Objetivo art. Lentos (meses)</label>
+                    <input type="number" id="targetSlow" placeholder="= objetivo" min="0.5" max="24" step="0.5">
+                    <div class="param-hint">Cobertura para los SKUs de rotaci&oacute;n lenta. Vac&iacute;o = Stock Objetivo</div>
                 </div>
             </div>
 
@@ -457,6 +474,8 @@
                 <strong>Clasif.</strong>: ABC (valor) + XYZ (variabilidad) + Patr&oacute;n ADI/CV&sup2; &nbsp;|&nbsp;
                 <strong>LT OK</strong>: Pedido = Demanda&times;(LT+Obj) + SS - Stock &nbsp;|&nbsp;
                 <strong>LT NO</strong>: Stock &lt; demanda LT &rarr; Pedido = Demanda&times;Obj + SS (sin deducir stock) &nbsp;|&nbsp;
+                <strong>Velocidad</strong>: R&aacute;pido = SKUs que suman el 50% de las unidades pronosticadas, Medio = hasta 85%, Lento = resto o &lt;1 un/mes &nbsp;|&nbsp;
+                <strong>Stock</strong> incluye unidades en tr&aacute;nsito (entrega futura) &nbsp;|&nbsp;
                 <strong>Edite</strong> la columna "Cant. Pedido" para ajustar manualmente
             </div>
         </div>
@@ -501,6 +520,12 @@
                             <option value="Intermitente">Intermitente</option>
                             <option value="Irregular">Irregular</option>
                             <option value="Sin Demanda">Sin Demanda</option>
+                        </select>
+                        <select id="velFilter" onchange="filterTable()">
+                            <option value="">Toda Velocidad</option>
+                            <option value="R&aacute;pido">R&aacute;pido</option>
+                            <option value="Medio">Medio</option>
+                            <option value="Lento">Lento</option>
                         </select>
                         <select id="abcFilter" onchange="filterTable()">
                             <option value="">Todas las Clases</option>
@@ -563,6 +588,7 @@
         let pageSize = 100;
         let filteredItems = [];
         let hiddenCols = new Set();
+        let hiddenColsInitialized = false;
         let filterTimeout = null;
         let markedRows = new Set();
         let selectedYears = new Set(); // contains explicitly selected years
@@ -688,6 +714,8 @@
                 salesMonths: document.getElementById("salesMonths").value,
                 minOrder: document.getElementById("minOrder").value,
                 rounding: document.getElementById("rounding").value,
+                targetFast: document.getElementById("targetFast").value,
+                targetSlow: document.getElementById("targetSlow").value,
                 excludedMonths: [...excludedMonths],
             };
             localStorage.setItem("orderPresets", JSON.stringify(presets));
@@ -707,6 +735,8 @@
             document.getElementById("salesMonths").value = p.salesMonths;
             document.getElementById("minOrder").value = p.minOrder;
             document.getElementById("rounding").value = p.rounding;
+            document.getElementById("targetFast").value = p.targetFast || "";
+            document.getElementById("targetSlow").value = p.targetSlow || "";
             excludedMonths = new Set(p.excludedMonths || []);
             buildMonthChips();
             showToast("Preset cargado: " + name, "info");
@@ -740,6 +770,8 @@
             fd.append("rounding", document.getElementById("rounding").value);
             fd.append("sales_months_to_use", document.getElementById("salesMonths").value);
             fd.append("excluded_months", [...excludedMonths].join(","));
+            fd.append("target_fast_months", document.getElementById("targetFast").value);
+            fd.append("target_slow_months", document.getElementById("targetSlow").value);
 
             document.getElementById("loading").classList.add("active");
             document.getElementById("results").style.display = "none";
@@ -895,15 +927,28 @@
                 <div class="stat-card warning"><div class="stat-icon">&#128312;</div><div class="value">${s.low_items}</div><div class="label">Stock Bajo</div></div>
                 <div class="stat-card success"><div class="stat-icon">&#128176;</div><div class="value">$${s.total_order_value_fob.toLocaleString(undefined,{minimumFractionDigits:2})}</div><div class="label">Valor Total (FOB)</div></div>
                 <div class="stat-card"><div class="stat-icon">&#128683;</div><div class="value">${s.no_sales_items}</div><div class="label">Sin Ventas</div></div>
+                ${s.lead_time_obs_median_days != null ? `<div class="stat-card" title="Mediana de (Fecha Ult. Entrega - Fecha Ult. Compra) en ${s.lead_time_obs_items} SKUs"><div class="stat-icon">&#9203;</div><div class="value">${Math.round(s.lead_time_obs_median_days)} d</div><div class="label">Lead Time Observado (&asymp;${s.lead_time_obs_median_months} m)</div></div>` : ""}
+                ${s.in_transit_items ? `<div class="stat-card"><div class="stat-icon">&#128666;</div><div class="value">${s.in_transit_items}</div><div class="label">SKUs en Tránsito</div></div>` : ""}
             `;
+            const lt = parseFloat(document.getElementById("leadTime").value);
+            if (s.lead_time_obs_median_months != null && lt > 0 && Math.abs(lt - s.lead_time_obs_median_months) >= 1) {
+                showToast(`Lead time observado en el archivo: ${Math.round(s.lead_time_obs_median_days)} días (≈${s.lead_time_obs_median_months} meses). El parámetro actual es ${lt} meses.`, "info");
+            }
 
             const dp = s.demand_pattern_counts;
             const abc = s.abc_xyz_counts;
             const abcKeys = Object.keys(abc).sort();
+            const vel = s.velocity_counts || {};
+            const velOrder = ["R\u00e1pido", "Medio", "Lento", "-"];
             document.getElementById("classGrid").innerHTML = `
                 <div class="class-card">
                     <h3>Patr\u00f3n de Demanda (Syntetos-Boylan)</h3>
                     ${Object.entries(dp).map(([k,v]) => `<div class="class-row"><span class="class-label">${k}</span><span class="class-value">${v} SKUs</span></div>`).join("")}
+                </div>
+                <div class="class-card">
+                    <h3>Velocidad de Rotaci\u00f3n</h3>
+                    ${velOrder.filter(k => vel[k]).map(k => `<div class="class-row"><span class="class-label">${k === "-" ? "Sin demanda" : k}</span><span class="class-value">${vel[k]} SKUs</span></div>`).join("")}
+                    <div class="class-row"><span class="class-label" style="font-size:0.7rem;color:var(--muted)">R\u00e1pido = 50% de unidades, Medio = hasta 85%, Lento = resto o &lt;1 un/mes</span></div>
                 </div>
                 <div class="class-card">
                     <h3>Clasificaci\u00f3n ABC-XYZ</h3>
@@ -926,13 +971,15 @@
                 if (r.fecha_compra_year) yearsSet.add(r.fecha_compra_year);
             });
             availableYears = [...yearsSet].sort((a, b) => b - a);
-            // Default to most recent year only
-            selectedYears = new Set();
-            if (availableYears.length > 0) {
-                selectedYears.add(availableYears[0]);
-            }
+            // Default: all years selected
+            selectedYears = new Set(availableYears);
             buildYearDropdown();
 
+            // Columns flagged hidden:true start hidden the first time (user can enable them)
+            if (!hiddenColsInitialized) {
+                [...baseCols, ...afterMonthCols].filter(c => c.hidden).forEach(c => hiddenCols.add(c.key));
+                hiddenColsInitialized = true;
+            }
             buildColToggle();
             currentPage = 1;
             filterTable();
@@ -943,26 +990,38 @@
             { key: "status", label: "Estado", align: "center", group: "Info" },
             { key: "abc_xyz", label: "ABC-XYZ", align: "center", group: "Info" },
             { key: "demand_pattern", label: "Patr\u00f3n", align: "center", group: "Info" },
+            { key: "velocidad", label: "Velocidad", align: "center", group: "Info" },
             { key: "material", label: "Material", group: "Info" },
+            { key: "art_proveedor", label: "Art. Prov.", group: "Info" },
             { key: "marca", label: "Marca", group: "Info" },
             { key: "cod_proveedor", label: "Proveedor", group: "Info" },
             { key: "descripcion", label: "Descripci\u00f3n", group: "Info" },
+            { key: "grupo", label: "Grupo", align: "center", group: "Info", hidden: true },
+            { key: "abc_proveedor", label: "ABC Arrocha", align: "center", group: "Info", hidden: true },
+            { key: "cod_barra", label: "Cod. Barra", group: "Info", hidden: true },
             { key: "fecha_compra", label: "\u00dalt. Compra", align: "center", group: "Compra" },
+            { key: "fecha_entrega", label: "\u00dalt. Entrega", align: "center", group: "Compra", hidden: true },
             { key: "cant_compra", label: "Cant. Comp.", align: "right", group: "Compra" },
+            { key: "lead_time_obs_days", label: "LT Obs. (d)", align: "right", group: "Compra" },
             { key: "stock_cedi", label: "CEDI", align: "right", group: "Stock" },
             { key: "stock_tiendas", label: "Tiendas", align: "right", group: "Stock" },
             { key: "stock_total", label: "Stock", align: "right", group: "Stock" },
+            { key: "en_transito", label: "Tr\u00e1nsito", align: "right", group: "Stock" },
         ];
 
         const afterMonthCols = [
+            { key: "ventas_mes_actual", label: "Mes Actual", align: "right", group: "C\u00e1lculo" },
             { key: "avg_monthly_sales", label: "Pron\u00f3stico", align: "right", group: "C\u00e1lculo" },
             { key: "forecast_method", label: "M\u00e9todo", align: "center", group: "C\u00e1lculo" },
             { key: "months_of_stock", label: "Meses Stock", align: "right", group: "C\u00e1lculo" },
             { key: "safety_stock_units", label: "Stock Seg.", align: "right", group: "C\u00e1lculo" },
             { key: "rop", label: "ROP", align: "right", group: "C\u00e1lculo" },
             { key: "lead_time_met", label: "LT", align: "center", group: "C\u00e1lculo" },
+            { key: "target_months_used", label: "Obj. (m)", align: "right", group: "C\u00e1lculo" },
             { key: "suggested_qty", label: "Cant. Pedido", align: "right", group: "Pedido" },
             { key: "fob", label: "FOB $", align: "right", group: "Pedido" },
+            { key: "costo", label: "Costo $", align: "right", group: "Pedido" },
+            { key: "pvp", label: "PVP $", align: "right", group: "Pedido" },
             { key: "order_value_fob", label: "Valor $", align: "right", group: "Pedido" },
         ];
 
@@ -1158,12 +1217,17 @@
             const abcF = document.getElementById("abcFilter").value;
             const orderF = document.getElementById("orderFilter").value;
 
+            const velF = document.getElementById("velFilter").value;
+
             if (search) items = items.filter(r =>
                 r.material.toLowerCase().includes(search) ||
                 r.descripcion.toLowerCase().includes(search) ||
                 r.marca.toLowerCase().includes(search) ||
+                (r.art_proveedor || "").toLowerCase().includes(search) ||
+                (r.cod_barra || "").toLowerCase().includes(search) ||
                 r.cod_proveedor.toLowerCase().includes(search));
             if (statusF) items = items.filter(r => r.status === statusF);
+            if (velF) items = items.filter(r => r.velocidad === velF);
             if (demandF) items = items.filter(r => r.demand_pattern === demandF);
             if (abcF) items = items.filter(r => r.abc === abcF);
             // Year filter: if years are selected, only show matching items
@@ -1312,13 +1376,20 @@
                 const dpCls = { "Suave": "suave", "Err\u00e1tica": "erratica", "Intermitente": "intermitente", "Irregular": "irregular" }[r.demand_pattern] || "";
                 return `<span class="badge badge-demand ${dpCls}">${r.demand_pattern}</span>`;
             }
+            if (key === "velocidad") {
+                if (!r.velocidad || r.velocidad === "-") return `<span style="color:var(--muted)">-</span>`;
+                const vCls = { "R\u00e1pido": "rapido", "Medio": "medio", "Lento": "lento" }[r.velocidad] || "";
+                return `<span class="badge badge-vel ${vCls}">${r.velocidad}</span>`;
+            }
+            if (key === "lead_time_obs_days") return r.lead_time_obs_days == null ? `<span style="color:var(--muted)">-</span>` : r.lead_time_obs_days;
+            if (key === "en_transito") return r.en_transito ? `<strong style="color:#2563eb">${r.en_transito}</strong>` : `<span style="color:var(--muted)">0</span>`;
             if (key === "lead_time_met") {
                 if (r.avg_monthly_sales === 0) return `<span style="color:var(--muted)">-</span>`;
                 return r.lead_time_met
                     ? `<span class="badge badge-lt-met" title="Stock cubre lead time">OK</span>`
                     : `<span class="badge badge-lt-not-met" title="Stock NO cubre lead time - pedido sin deducci\u00f3n">NO</span>`;
             }
-            if (key === "fob") return "$" + r.fob.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            if (key === "fob" || key === "costo" || key === "pvp") return "$" + (r[key] || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
             if (key === "order_value_fob") {
                 const effectiveVal = getEffectiveValue(r);
                 const isEdited = userEdits[r.material] !== undefined;
@@ -1525,41 +1596,27 @@
         let sessionFileName = "";
 
         function getSessionState() {
+            // Saves only report preferences and data — NOT the calculation parameters.
+            // To save calculation parameters, use Presets instead.
             return {
                 currentData: currentData,
                 userEdits: userEdits,
                 markedRows: [...markedRows],
                 selectedYears: [...selectedYears],
                 availableYears: availableYears,
-                excludedMonths: [...excludedMonths],
                 hiddenCols: [...hiddenCols],
-                params: {
-                    leadTime: document.getElementById("leadTime").value,
-                    targetStock: document.getElementById("targetStock").value,
-                    serviceLevel: document.getElementById("serviceLevel").value,
-                    salesMonths: document.getElementById("salesMonths").value,
-                    minOrder: document.getElementById("minOrder").value,
-                    rounding: document.getElementById("rounding").value,
-                },
                 fileName: sessionFileName || (currentFile ? currentFile.name : "Sin nombre"),
             };
         }
 
         function restoreSessionState(state) {
-            // Restore params
-            if (state.params) {
-                document.getElementById("leadTime").value = state.params.leadTime;
-                document.getElementById("targetStock").value = state.params.targetStock;
-                document.getElementById("serviceLevel").value = state.params.serviceLevel;
-                document.getElementById("salesMonths").value = state.params.salesMonths;
-                document.getElementById("minOrder").value = state.params.minOrder;
-                document.getElementById("rounding").value = state.params.rounding;
-            }
-            // Restore excluded months
-            excludedMonths = new Set(state.excludedMonths || []);
-            buildMonthChips();
+            // Note: calculation parameters (leadTime, targetStock, serviceLevel, salesMonths,
+            // minOrder, rounding, excludedMonths) are intentionally NOT restored.
+            // They are managed via Presets and the user's current input values are preserved.
+
             // Restore hidden cols
             hiddenCols = new Set(state.hiddenCols || []);
+            hiddenColsInitialized = true;
             // Restore data
             currentData = state.currentData;
             userEdits = state.userEdits || {};

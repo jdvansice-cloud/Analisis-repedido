@@ -141,35 +141,30 @@
     <!-- 2. ARCHIVO EXCEL -->
     <h2 id="archivo">2. Preparaci&oacute;n del Archivo Excel</h2>
 
-    <p>El archivo debe contener una fila de encabezado con la columna <strong>"Material"</strong> en las primeras 10 filas. El sistema detectar&aacute; autom&aacute;ticamente la fila de encabezado.</p>
+    <p>Suba <strong>un archivo a la vez</strong>: el reporte de repedido exportado de Arrocha con los art&iacute;culos que desea analizar. El sistema detecta autom&aacute;ticamente la fila de encabezado (busca la columna <strong>"N&deg; Material"</strong> o <strong>"Material"</strong> en las primeras 10 filas) y reconoce los dos formatos de exportaci&oacute;n.</p>
 
-    <h3>Columnas requeridas</h3>
+    <h3>Formato actual (reporte de repedido)</h3>
     <table>
-        <tr><th>Columna</th><th>Descripci&oacute;n</th><th>Tipo</th></tr>
-        <tr><td>Material</td><td>C&oacute;digo &uacute;nico del art&iacute;culo (SKU)</td><td>Texto</td></tr>
-        <tr><td>Descripcion</td><td>Nombre o descripci&oacute;n del producto</td><td>Texto</td></tr>
-        <tr><td>Stock Total</td><td>Inventario total actual (todas las ubicaciones)</td><td>N&uacute;mero</td></tr>
-        <tr><td>Vta 01 a Vta 12</td><td>Ventas mensuales (Vta 01 = mes m&aacute;s reciente)</td><td>N&uacute;mero</td></tr>
-        <tr><td>FOB</td><td>Costo unitario FOB (para valorizar pedidos)</td><td>N&uacute;mero</td></tr>
-        <tr><td>Ventas UN</td><td>Ventas totales en unidades (para clasificaci&oacute;n ABC)</td><td>N&uacute;mero</td></tr>
+        <tr><th>Columna</th><th>Descripci&oacute;n</th><th>Uso en el c&aacute;lculo</th></tr>
+        <tr><td>N&deg; Material</td><td>C&oacute;digo SKU</td><td>Identificador</td></tr>
+        <tr><td>No. Art. Proveedor</td><td>C&oacute;digo del art&iacute;culo seg&uacute;n el proveedor</td><td>Se muestra y exporta (&uacute;til para armar la orden)</td></tr>
+        <tr><td>Descripcion, Marca, Grupo, Cod. Barra, Tecla</td><td>Datos descriptivos</td><td>B&uacute;squeda y exportaci&oacute;n</td></tr>
+        <tr><td>ABC</td><td>Clase ABC asignada por Arrocha</td><td>Se muestra como "ABC Arrocha" (oculta por defecto). La app calcula su propio ABC sobre el archivo.</td></tr>
+        <tr><td>Cod. Proveedor</td><td>C&oacute;digo del proveedor</td><td>Agrupaci&oacute;n por proveedor</td></tr>
+        <tr><td>Fecha Ult. Compra / Fecha Ult. Entrega</td><td>&Uacute;ltima orden y su recepci&oacute;n</td><td><strong>Lead time observado</strong> (d&iacute;as entre ambas) y detecci&oacute;n de <strong>unidades en tr&aacute;nsito</strong> (si la entrega es futura)</td></tr>
+        <tr><td>Ult. Cantidad</td><td>Unidades de la &uacute;ltima compra</td><td>Se suma al stock como "en tr&aacute;nsito" si a&uacute;n no se recibi&oacute;</td></tr>
+        <tr><td>Stock CEDI, Stock Tiendas, Stock Total</td><td>Inventario actual</td><td>Stock disponible</td></tr>
+        <tr><td>FOB, Costo, PV</td><td>Costos y precio</td><td>Valorizaci&oacute;n del pedido (FOB) y clasificaci&oacute;n ABC</td></tr>
+        <tr><td>Vta Prom Mes, Ventas UN Total</td><td>Promedio y total de 12 meses</td><td>Clasificaci&oacute;n ABC y respaldo del pron&oacute;stico</td></tr>
+        <tr><td>Mes12 &hellip; Mes1</td><td>Ventas de los &uacute;ltimos 12 meses completos. <strong>Mes1 = mes pasado</strong>, Mes12 = hace un a&ntilde;o</td><td>Pron&oacute;stico, patr&oacute;n de demanda, XYZ</td></tr>
+        <tr><td>Actual</td><td>Ventas del mes en curso (parcial)</td><td>Solo se muestra ("Mes Actual"); no entra al pron&oacute;stico porque el mes no termin&oacute;</td></tr>
     </table>
 
-    <h3>Columnas opcionales</h3>
-    <table>
-        <tr><th>Columna</th><th>Descripci&oacute;n</th></tr>
-        <tr><td>Marca</td><td>Marca del producto</td></tr>
-        <tr><td>Cod. Proveedor Actual</td><td>C&oacute;digo del proveedor (para agrupaci&oacute;n)</td></tr>
-        <tr><td>Stock CEDI</td><td>Stock en centro de distribuci&oacute;n</td></tr>
-        <tr><td>Stock Tiendas</td><td>Stock en tiendas</td></tr>
-        <tr><td>Fe. Comp</td><td>Fecha de &uacute;ltima compra</td></tr>
-        <tr><td>Cant.</td><td>Cantidad de &uacute;ltima compra</td></tr>
-        <tr><td>Costo</td><td>Costo unitario local</td></tr>
-        <tr><td>PVP</td><td>Precio de venta al p&uacute;blico</td></tr>
-        <tr><td>Vta Prom Mensual</td><td>Promedio mensual de ventas (fallback)</td></tr>
-    </table>
+    <h3>Formato anterior (compatible)</h3>
+    <p>Tambi&eacute;n se aceptan archivos con las columnas <strong>Material</strong>, <strong>Vta 01&ndash;Vta 12</strong> (Vta 01 = mes m&aacute;s reciente), <strong>Fe. Comp</strong>, <strong>Cant.</strong>, <strong>PVP</strong>, <strong>Vta Prom Mensual</strong>, <strong>Ventas UN</strong> y <strong>Cod. Proveedor Actual</strong>. Internamente ambos formatos se convierten a la misma estructura.</p>
 
     <div class="tip">
-        <strong>Tip:</strong> Las columnas de ventas mensuales (Vta 01&ndash;Vta 12) deben estar ordenadas del mes m&aacute;s reciente (Vta 01) al m&aacute;s antiguo (Vta 12). Los nombres se mapean autom&aacute;ticamente a los meses calendario correspondientes.
+        <strong>Tip:</strong> Las etiquetas de mes en la tabla (ej. "Ago 26") se calculan a partir de la fecha de hoy, asumiendo que Mes1 / Vta 01 es el mes calendario anterior. Si analiza un archivo exportado hace varias semanas, tenga en cuenta ese desfase.
     </div>
 
 
@@ -208,7 +203,16 @@
             <td>Las cantidades se redondean hacia arriba al m&uacute;ltiplo m&aacute;s cercano. &Uacute;til para empaques o cajas.</td>
             <td>1 (sin redondeo)</td>
         </tr>
+        <tr>
+            <td><strong>Objetivo art. R&aacute;pidos / Lentos (meses)</strong></td>
+            <td>Cobertura objetivo espec&iacute;fica para los SKUs de rotaci&oacute;n r&aacute;pida y lenta (ver secci&oacute;n 7.13). Si se dejan vac&iacute;os se usa el Stock Objetivo general. Permite, por ejemplo, cubrir 6 meses en los r&aacute;pidos y solo 3 en los lentos para no acumular inventario de baja rotaci&oacute;n.</td>
+            <td>R&aacute;pidos = objetivo, Lentos = 2&ndash;3 meses</td>
+        </tr>
     </table>
+
+    <div class="tip">
+        <strong>Lead time observado:</strong> al calcular, el resumen muestra la mediana de d&iacute;as entre "Fecha Ult. Compra" y "Fecha Ult. Entrega" de los SKUs del archivo. Si difiere en m&aacute;s de un mes del par&aacute;metro "Tiempo de Entrega", la app lo avisa. Recuerde que el par&aacute;metro debe incluir tambi&eacute;n el tiempo hasta el <em>pr&oacute;ximo</em> pedido si no ordena todos los meses.
+    </div>
 
     <div class="warning">
         <strong>Nota:</strong> Un nivel de servicio del 99% puede generar hasta 40% m&aacute;s stock de seguridad que un 95%. Use niveles altos solo para art&iacute;culos cr&iacute;ticos (Clase A).
@@ -325,25 +329,25 @@
 
     <div class="formula">
         <span class="label">Promedio M&oacute;vil</span>
-        Pron&oacute;stico = Suma de ventas en per&iacute;odo reciente &divide; N&uacute;mero de meses con venta &gt; 0
+        Pron&oacute;stico = Suma de ventas desde la primera venta del per&iacute;odo &divide; Meses desde esa primera venta
     </div>
 
     <div class="tip">
-        <strong>Nota:</strong> Se divide por meses <em>con venta</em>, no por el total de meses. Esto evita que meses con 0 ventas (por quiebre de stock, por ejemplo) diluyan el promedio.
+        <strong>Nota:</strong> Los meses <em>anteriores</em> a la primera venta dentro del per&iacute;odo se ignoran (art&iacute;culos nuevos que a&uacute;n no se vend&iacute;an). Los meses con 0 ventas <em>despu&eacute;s</em> de esa primera venta s&iacute; cuentan como demanda cero. Esto evita inflar el pron&oacute;stico de art&iacute;culos de baja rotaci&oacute;n: un producto que vende 10 unidades un mes y 0 el siguiente rota a 5 por mes, no a 10. Si sospecha que un 0 se debe a un quiebre de stock, excluya ese mes en la secci&oacute;n 4.
     </div>
 
     <div class="card">
         <div class="card-title">Ejemplo: Promedio M&oacute;vil (3 meses recientes)</div>
-        <p>Ventas recientes: <strong>120, 0, 95</strong></p>
+        <p>Ventas recientes (del m&aacute;s reciente al m&aacute;s antiguo): <strong>120, 0, 95</strong></p>
         <ul>
+            <li>Primera venta del per&iacute;odo: el mes m&aacute;s antiguo (95) &rarr; se usan los 3 meses</li>
             <li>Suma = 120 + 0 + 95 = 215</li>
-            <li>Meses con venta = 2 (se excluye el mes con 0)</li>
-            <li>Pron&oacute;stico = 215 &divide; 2 = <strong>107.5 unidades/mes</strong></li>
+            <li>Pron&oacute;stico = 215 &divide; 3 = <strong>71.7 unidades/mes</strong></li>
         </ul>
-        <p>Si se usaran 6 meses con ventas <strong>120, 0, 95, 110, 105, 130</strong>:</p>
+        <p>Art&iacute;culo nuevo con 6 meses de historial <strong>10, 6, 0, 0, 0, 0</strong> (empez&oacute; a venderse hace 2 meses):</p>
         <ul>
-            <li>Suma = 560, Meses con venta = 5</li>
-            <li>Pron&oacute;stico = 560 &divide; 5 = <strong>112.0 unidades/mes</strong></li>
+            <li>Los 4 meses sin venta anteriores al lanzamiento se ignoran</li>
+            <li>Pron&oacute;stico = (10 + 6) &divide; 2 = <strong>8.0 unidades/mes</strong></li>
         </ul>
     </div>
 
@@ -486,6 +490,10 @@
 
     <div class="important">
         <strong>Regla clave:</strong> El sistema compara el Stock Actual contra la Demanda del Lead Time (Pron&oacute;stico &times; Lead Time) para decidir qu&eacute; f&oacute;rmula usar.
+    </div>
+
+    <div class="tip">
+        <strong>Stock Actual = Stock Total + En Tr&aacute;nsito.</strong> Si la "Fecha Ult. Entrega" del archivo es posterior a hoy, la "Ult. Cantidad" a&uacute;n no lleg&oacute; y se suma al stock para no pedirla dos veces (columna "Tr&aacute;nsito"). <strong>Stock Objetivo</strong> es el general, o el de R&aacute;pidos/Lentos seg&uacute;n la velocidad del art&iacute;culo (columna "Obj. (m)").
     </div>
 
     <h3>Caso 1: Stock cubre el Lead Time <span class="badge b-green">LT OK</span></h3>
@@ -782,6 +790,32 @@
     </div>
 
 
+    <!-- 7.13 VELOCIDAD -->
+    <h3>7.13 Velocidad de Rotaci&oacute;n (R&aacute;pido / Medio / Lento)</h3>
+    <p>Cada categor&iacute;a vende a un ritmo distinto, y dentro de un mismo archivo conviven art&iacute;culos que rotan 40 unidades al mes con otros que rotan 2. La velocidad clasifica los SKUs <em>relativamente dentro del archivo subido</em>, ordenando por pron&oacute;stico mensual (unidades/mes):</p>
+    <table>
+        <tr><th>Velocidad</th><th>Criterio</th><th>Uso</th></tr>
+        <tr><td><strong>R&aacute;pido</strong></td><td>Los SKUs de mayor pron&oacute;stico que en conjunto suman el <strong>50%</strong> de las unidades pronosticadas</td><td>Son los que mueven el volumen. Suelen justificar la cobertura completa y un nivel de servicio alto.</td></tr>
+        <tr><td><strong>Medio</strong></td><td>Los siguientes hasta acumular el <strong>85%</strong></td><td>Cobertura general.</td></tr>
+        <tr><td><strong>Lento</strong></td><td>El <strong>15%</strong> restante, o cualquier SKU con pron&oacute;stico <strong>&lt; 1 unidad/mes</strong></td><td>Riesgo de sobre-stock. Conviene una cobertura menor y revisar si vale la pena reponer.</td></tr>
+        <tr><td>&ndash;</td><td>Sin demanda en 12 meses</td><td>No se calcula pedido.</td></tr>
+    </table>
+    <p>Con los par&aacute;metros <strong>"Objetivo art. R&aacute;pidos"</strong> y <strong>"Objetivo art. Lentos"</strong> se asigna una cobertura distinta a cada grupo; los art&iacute;culos Medio usan el Stock Objetivo general. La columna "Obj. (m)" muestra qu&eacute; cobertura se aplic&oacute; a cada fila y el filtro "Velocidad" permite revisar cada grupo por separado.</p>
+
+    <div class="card">
+        <div class="card-title">Ejemplo: mismo archivo, coberturas distintas</div>
+        <p>Lead time 1 mes, Stock Objetivo 6 meses, "Objetivo Lentos" = 3, stock actual 0 en ambos casos (LT NO cubierto):</p>
+        <ul>
+            <li>SKU r&aacute;pido, pron&oacute;stico 40 un/mes &rarr; Cantidad = 40 &times; 6 + SS = <strong>240 + SS</strong></li>
+            <li>SKU lento, pron&oacute;stico 2 un/mes &rarr; Cantidad = 2 &times; 3 + SS = <strong>6 + SS</strong> (en lugar de 12 + SS con la cobertura general)</li>
+        </ul>
+    </div>
+
+    <div class="tip">
+        <strong>Tip:</strong> Como la velocidad es relativa al archivo, suba un archivo por categor&iacute;a o proveedor (por ejemplo, solo velas o solo aceites) para que "R&aacute;pido" y "Lento" tengan sentido dentro de ese grupo. Si mezcla categor&iacute;as muy distintas, la de menor rotaci&oacute;n quedar&aacute; casi toda como "Lento".
+    </div>
+
+
     <!-- 8. CLASIFICACIONES -->
     <h2 id="clasificacion">8. Resumen de Clasificaciones</h2>
 
@@ -824,17 +858,25 @@
         <tr><td>Estado</td><td>Cr&iacute;tico, Bajo, Reponer, OK o Sin Ventas</td></tr>
         <tr><td>ABC-XYZ</td><td>Clasificaci&oacute;n combinada (ej: AX, BY, CZ)</td></tr>
         <tr><td>Patr&oacute;n</td><td>Patr&oacute;n de demanda (Suave, Err&aacute;tica, Intermitente, Irregular)</td></tr>
+        <tr><td>Velocidad</td><td>Rotaci&oacute;n relativa dentro del archivo: R&aacute;pido, Medio o Lento (ver 7.13)</td></tr>
         <tr><td>Material</td><td>C&oacute;digo SKU del art&iacute;culo</td></tr>
+        <tr><td>Art. Prov.</td><td>C&oacute;digo del art&iacute;culo seg&uacute;n el proveedor</td></tr>
         <tr><td>Marca</td><td>Marca del producto</td></tr>
         <tr><td>Proveedor</td><td>C&oacute;digo del proveedor actual</td></tr>
         <tr><td>Descripci&oacute;n</td><td>Nombre del producto</td></tr>
+        <tr><td>Grupo, ABC Arrocha, Cod. Barra</td><td>Datos del reporte (ocultas por defecto; act&iacute;velas desde "Columnas")</td></tr>
         <tr><td>&Uacute;lt. Compra</td><td>Fecha de la &uacute;ltima compra (formato: Mes A&ntilde;o, ej: "Mar 2025"). Usada para el filtro de a&ntilde;os.</td></tr>
+        <tr><td>&Uacute;lt. Entrega</td><td>Fecha de recepci&oacute;n de la &uacute;ltima compra (oculta por defecto)</td></tr>
         <tr><td>Cant. Comp.</td><td>Cantidad de la &uacute;ltima compra</td></tr>
+        <tr><td>LT Obs. (d)</td><td>Lead time observado en d&iacute;as: &Uacute;lt. Entrega &minus; &Uacute;lt. Compra</td></tr>
         <tr><td>CEDI</td><td>Stock en centro de distribuci&oacute;n</td></tr>
         <tr><td>Tiendas</td><td>Stock en tiendas</td></tr>
         <tr><td>Stock</td><td>Stock total (CEDI + Tiendas)</td></tr>
-        <tr><td>Meses (Vta 01&ndash;12)</td><td>Ventas por mes (del m&aacute;s reciente al m&aacute;s antiguo)</td></tr>
+        <tr><td>Tr&aacute;nsito</td><td>Unidades de la &uacute;ltima compra que a&uacute;n no se reciben (entrega futura). Se suman al stock para el c&aacute;lculo.</td></tr>
+        <tr><td>Meses (12)</td><td>Ventas por mes, del m&aacute;s antiguo (izquierda) al m&aacute;s reciente (derecha)</td></tr>
+        <tr><td>Mes Actual</td><td>Ventas del mes en curso (parcial). Informativo; no entra al pron&oacute;stico.</td></tr>
         <tr><td>Pron&oacute;stico</td><td>Demanda mensual pronosticada (seg&uacute;n m&eacute;todo)</td></tr>
+        <tr><td>Obj. (m)</td><td>Meses de cobertura objetivo aplicados a este SKU (general o por velocidad)</td></tr>
         <tr><td>M&eacute;todo</td><td>M&eacute;todo de pron&oacute;stico utilizado</td></tr>
         <tr><td>Meses Stock</td><td>Cu&aacute;ntos meses de venta cubre el stock actual</td></tr>
         <tr><td>Stock Seg.</td><td>Stock de seguridad calculado (unidades)</td></tr>
